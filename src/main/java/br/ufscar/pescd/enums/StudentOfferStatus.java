@@ -1,0 +1,11 @@
+package br.ufscar.pescd.enums;
+
+public enum StudentOfferStatus {
+    NAO_ENVIADO,
+    PLANO_ENVIADO,
+    PLANO_APROVADO,
+    DOCUMENTACAO_ENVIADA,
+    RELATORIO_ENVIADO,
+    RELATORIO_APROVADO_SUPERVISOR,
+    CONCLUIDO_RESPONSAVEL
+}
