@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${isEdit} ? 'Editar usuário - PESCD' : 'Novo usuário - PESCD'"></title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f5f7fa;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 40px auto;
+            background: white;
+            padding: 28px;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, .08);
+        }
+
+        form {
+            display: grid;
+            gap: 16px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        .error {
+            color: #b91c1c;
+            font-size: 14px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        a, button {
+            text-decoration: none;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .primary {
+            background: #1976d2;
+            color: white;
+        }
+
+        .secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 th:text="${isEdit} ? 'Editar usuário' : 'Cadastrar usuário'"></h1>
+
+    <form th:action="${isEdit} ? @{/admin/users/{id}(id=${userForm.id})} : @{/admin/users}"
+          th:object="${userForm}"
+          method="post">
+
+        <div>
+            <label for="fullName">Nome completo</label>
+            <input id="fullName" type="text" th:field="*{fullName}">
+            <div class="error" th:errors="*{fullName}"></div>
+        </div>
+
+        <div>
+            <label for="email">E-mail</label>
+            <input id="email" type="email" th:field="*{email}">
+            <div class="error" th:errors="*{email}"></div>
+        </div>
+
+        <div>
+            <label for="username">Nome de usuário</label>
+            <input id="username" type="text" th:field="*{username}">
+            <div class="error" th:errors="*{username}"></div>
+        </div>
+
+        <div>
+            <label for="password" th:text="${isEdit} ? 'Senha (opcional para manter a atual)' : 'Senha'"></label>
+            <input id="password" type="password" th:field="*{password}">
+            <div class="error" th:errors="*{password}"></div>
+        </div>
+
+        <div>
+            <label for="role">Perfil</label>
+            <select id="role" th:field="*{role}">
+                <option value="">Selecione</option>
+                <option th:each="role : ${roles}" th:value="${role}" th:text="${role.displayName}"></option>
+            </select>
+            <div class="error" th:errors="*{role}"></div>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="primary">Salvar</button>
+            <a th:href="@{/admin/users}" class="secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

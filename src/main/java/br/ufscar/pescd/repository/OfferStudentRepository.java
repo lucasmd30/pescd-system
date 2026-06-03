@@ -17,4 +17,6 @@ public interface OfferStudentRepository extends JpaRepository<OfferStudent, Long
     Optional<OfferStudent> findByOfferAndStudent(Offer offer, User student);
 
     long countByOffer(Offer offer);
+
+    boolean existsByOfferAndStudent(Offer offer, User student);
 }

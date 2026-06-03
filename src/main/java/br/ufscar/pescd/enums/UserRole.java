@@ -4,5 +4,14 @@ public enum UserRole {
     ADMIN,
     SECRETARIO,
     ALUNO,
-    PROFESSOR
+    PROFESSOR;
+
+    public String getDisplayName() {
+        return switch (this) {
+            case ADMIN -> "Administrador";
+            case SECRETARIO -> "Secretário";
+            case ALUNO -> "Aluno";
+            case PROFESSOR -> "Professor";
+        };
+    }
 }

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Acesso negado - PESCD</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f7fa;
+            color: #1f2937;
+        }
+
+        .card {
+            max-width: 520px;
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, .08);
+            text-align: center;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            background: #1976d2;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>Acesso negado</h1>
+    <p>Seu perfil não tem permissão para acessar esta funcionalidade.</p>
+    <a th:href="@{/dashboard}">Voltar ao painel</a>
+</div>
+</body>
+</html>

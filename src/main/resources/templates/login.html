@@ -12,6 +12,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            margin: 0;
         }
 
         .login-box {
@@ -19,7 +20,7 @@
             padding: 32px;
             border-radius: 12px;
             width: 360px;
-            box-shadow: 0 4px 16px rgba(0,0,0,.1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .1);
         }
 
         h2 {
@@ -58,6 +59,14 @@
             text-align: center;
             margin-bottom: 12px;
         }
+
+        .info {
+            background: #eef4ff;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
     </style>
 </head>
 <body>
@@ -66,38 +75,25 @@
 
     <h2>PESCD Login</h2>
 
-    <div
-            th:if="${param.error}"
-            class="error">
-        Usuário ou senha inválidos
+    <div class="info">
+        Use seu nome de usuário e senha para acessar as funcionalidades do seu perfil.
     </div>
 
-    <div
-            th:if="${param.logout}"
-            class="success">
-        Logout realizado com sucesso
+    <div th:if="${param.error}" class="error">
+        Usuário ou senha inválidos.
     </div>
 
-    <form
-            th:action="@{/login}"
-            method="post">
+    <div th:if="${param.logout}" class="success">
+        Logout realizado com sucesso.
+    </div>
 
-        <input
-                type="text"
-                name="username"
-                placeholder="Usuário"
-                required>
-
-        <input
-                type="password"
-                name="password"
-                placeholder="Senha"
-                required>
+    <form th:action="@{/login}" method="post">
+        <input type="text" name="username" placeholder="Usuário" required>
+        <input type="password" name="password" placeholder="Senha" required>
 
         <button type="submit">
             Entrar
         </button>
-
     </form>
 
 </div>

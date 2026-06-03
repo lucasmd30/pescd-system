@@ -1,6 +1,7 @@
 package br.ufscar.pescd.config;
 
 import br.ufscar.pescd.security.CustomUserDetailsService;
+import br.ufscar.pescd.security.RoleBasedAuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,11 +15,14 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
+    private final RoleBasedAuthenticationSuccessHandler successHandler;
 
     public SecurityConfig(
-            CustomUserDetailsService customUserDetailsService
+            CustomUserDetailsService customUserDetailsService,
+            RoleBasedAuthenticationSuccessHandler successHandler
     ) {
         this.customUserDetailsService = customUserDetailsService;
+        this.successHandler = successHandler;
     }
 
     @Bean
@@ -34,16 +38,20 @@ public class SecurityConfig {
                                 "/css/**",
                                 "/js/**"
                         ).permitAll()
+                        .requestMatchers("/admin/users/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/", true)
+                        .successHandler(successHandler)
                         .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
+                )
+                .exceptionHandling(exception -> exception
+                        .accessDeniedPage("/access-denied")
                 )
                 .userDetailsService(customUserDetailsService);
 

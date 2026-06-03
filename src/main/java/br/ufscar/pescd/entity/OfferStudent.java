@@ -18,16 +18,10 @@ public class OfferStudent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /*
-     oferta
-     */
     @ManyToOne
     @JoinColumn(name = "offer_id", nullable = false)
     private Offer offer;
 
-    /*
-     aluno
-     */
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
     private User student;
