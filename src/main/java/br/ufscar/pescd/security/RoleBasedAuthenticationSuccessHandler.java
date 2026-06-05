@@ -42,7 +42,7 @@ public class RoleBasedAuthenticationSuccessHandler implements AuthenticationSucc
         }
 
         if (authorities.contains("ROLE_ALUNO")) {
-            response.sendRedirect(request.getContextPath() + "/dashboard/aluno");
+            response.sendRedirect(request.getContextPath() + "/aluno/ofertas");
             return;
         }
 

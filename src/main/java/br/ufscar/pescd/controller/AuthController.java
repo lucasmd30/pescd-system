@@ -55,7 +55,7 @@ public class AuthController {
             return "redirect:/dashboard/professor";
         }
 
-        return "redirect:/dashboard/aluno";
+        return "redirect:/aluno/ofertas";
     }
 
     @GetMapping("/dashboard/secretario")
@@ -65,11 +65,6 @@ public class AuthController {
 
     @GetMapping("/dashboard/professor")
     public String professorDashboard() {
-        return "dashboard";
-    }
-
-    @GetMapping("/dashboard/aluno")
-    public String alunoDashboard() {
         return "dashboard";
     }
 }

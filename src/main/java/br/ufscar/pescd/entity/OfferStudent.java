@@ -26,6 +26,10 @@ public class OfferStudent {
     @JoinColumn(name = "student_id", nullable = false)
     private User student;
 
+    @ManyToOne
+    @JoinColumn(name = "supervisor_id")
+    private User supervisor;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StudentOfferStatus status;

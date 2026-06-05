@@ -3,16 +3,19 @@ package br.ufscar.pescd.config;
 import br.ufscar.pescd.entity.Offer;
 import br.ufscar.pescd.entity.OfferStudent;
 import br.ufscar.pescd.entity.User;
+import br.ufscar.pescd.entity.WorkPlan;
 import br.ufscar.pescd.enums.OfferStatus;
 import br.ufscar.pescd.enums.StudentOfferStatus;
 import br.ufscar.pescd.enums.UserRole;
 import br.ufscar.pescd.repository.OfferRepository;
 import br.ufscar.pescd.repository.OfferStudentRepository;
 import br.ufscar.pescd.repository.UserRepository;
+import br.ufscar.pescd.repository.WorkPlanRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -22,17 +25,20 @@ public class DataInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
     private final OfferRepository offerRepository;
     private final OfferStudentRepository offerStudentRepository;
+    private final WorkPlanRepository workPlanRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DataInitializer(
             UserRepository userRepository,
             OfferRepository offerRepository,
             OfferStudentRepository offerStudentRepository,
+            WorkPlanRepository workPlanRepository,
             PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
         this.offerRepository = offerRepository;
         this.offerStudentRepository = offerStudentRepository;
+        this.workPlanRepository = workPlanRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -86,13 +92,20 @@ public class DataInitializer implements CommandLineRunner {
                 admin
         );
 
-        enroll(aluno1, offer1);
-        enroll(aluno2, offer1);
-        enroll(aluno3, offer2);
-        enroll(aluno4, offer2);
-        enroll(aluno1, offer3);
-        enroll(aluno4, offer3);
-        enroll(aluno2, offer4);
+        enroll(aluno1, offer1, StudentOfferStatus.NAO_ENVIADO);
+        OfferStudent aluno2Offer1 =
+                enroll(aluno2, offer1, StudentOfferStatus.PLANO_APROVADO);
+        enroll(aluno3, offer2, StudentOfferStatus.NAO_ENVIADO);
+        enroll(aluno4, offer2, StudentOfferStatus.PLANO_APROVADO);
+        enroll(aluno1, offer3, StudentOfferStatus.PLANO_APROVADO);
+        enroll(aluno4, offer3, StudentOfferStatus.NAO_ENVIADO);
+        enroll(aluno2, offer4, StudentOfferStatus.CONCLUIDO_RESPONSAVEL);
+
+        if (aluno2Offer1 != null) {
+            aluno2Offer1.setSupervisor(professorNaldi);
+            offerStudentRepository.save(aluno2Offer1);
+            seedWorkPlan(aluno2Offer1);
+        }
     }
 
     private User upsertUser(
@@ -135,16 +148,31 @@ public class DataInitializer implements CommandLineRunner {
         return offerRepository.save(offer);
     }
 
-    private void enroll(User student, Offer offer) {
-        if (offerStudentRepository.existsByOfferAndStudent(offer, student)) {
+    private OfferStudent enroll(User student, Offer offer, StudentOfferStatus status) {
+        OfferStudent offerStudent = offerStudentRepository
+                .findByOfferAndStudent(offer, student)
+                .orElseGet(OfferStudent::new);
+        offerStudent.setStudent(student);
+        offerStudent.setOffer(offer);
+        offerStudent.setStatus(status);
+        return offerStudentRepository.save(offerStudent);
+    }
+
+    private void seedWorkPlan(OfferStudent offerStudent) {
+        if (workPlanRepository.findByOfferStudent(offerStudent).isPresent()) {
             return;
         }
 
-        OfferStudent offerStudent = new OfferStudent();
-        offerStudent.setStudent(student);
-        offerStudent.setOffer(offer);
-        offerStudent.setStatus(StudentOfferStatus.PLANO_APROVADO);
-        offerStudentRepository.save(offerStudent);
+        WorkPlan workPlan = new WorkPlan();
+        workPlan.setOfferStudent(offerStudent);
+        workPlan.setDisciplineCode("1000123");
+        workPlan.setDisciplineName("Algoritmo e Estrutura de Dados I");
+        workPlan.setDisciplineCourse("Bacharelado em Ciência da Computação");
+        workPlan.setFileName("plano-exemplo.pdf");
+        workPlan.setContentType("application/pdf");
+        workPlan.setFileContent(
+                "%PDF-1.4\n% Plano de trabalho de exemplo (PESCD)\n".getBytes(StandardCharsets.UTF_8));
+        workPlanRepository.save(workPlan);
     }
 
     private void removeLegacyMockOffers() {

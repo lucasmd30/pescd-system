@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Alunos da Oferta - PESCD</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+            margin: 0;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 48px auto;
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, .08);
+        }
+
+        h1 {
+            margin-bottom: 8px;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            margin-bottom: 24px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            background: #fafafa;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 4px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .error {
+            color: #dc2626;
+            font-size: 13px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #1976d2;
+            color: white;
+            text-align: left;
+            padding: 12px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        a, button {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .primary {
+            background: #1976d2;
+            color: white;
+        }
+
+        .secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .flash-success, .flash-error {
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+        }
+
+        .flash-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .flash-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        code {
+            background: #eef2ff;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Gestão de alunos</h1>
+    <p class="subtitle">
+        Oferta: <strong th:text="${offer.name}"></strong>
+        — <span th:text="${offer.semester}"></span>
+    </p>
+
+    <div th:if="${successMessage}" class="flash-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="flash-error" th:text="${errorMessage}"></div>
+
+    <div class="card">
+        <h2>Adicionar aluno</h2>
+        <p class="subtitle">Se o e-mail já existir no sistema, o aluno é apenas vinculado a esta oferta.</p>
+
+        <form th:action="@{/secretary/offers/{id}/students(id=${offer.id})}"
+              th:object="${studentForm}" method="post">
+            <div class="grid">
+                <div>
+                    <label for="fullName">Nome completo *</label>
+                    <input type="text" id="fullName" th:field="*{fullName}">
+                    <div class="error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
+                </div>
+                <div>
+                    <label for="email">E-mail *</label>
+                    <input type="email" id="email" th:field="*{email}">
+                    <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                </div>
+                <div>
+                    <label for="username">Nome de usuário *</label>
+                    <input type="text" id="username" th:field="*{username}">
+                    <div class="error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+                </div>
+                <div>
+                    <label for="password">Senha *</label>
+                    <input type="password" id="password" th:field="*{password}">
+                    <div class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                </div>
+            </div>
+            <button type="submit" class="primary" style="margin-top: 12px;">Adicionar aluno</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Importar via CSV</h2>
+        <p class="subtitle">
+            Cabeçalho esperado: <code>RA,NOME_COMPLETO,EMAIL</code>.
+            Alunos já cadastrados são vinculados; novos são criados usando o e-mail como nome de
+            usuário e o RA como senha.
+        </p>
+        <form th:action="@{/secretary/offers/{id}/students/import(id=${offer.id})}"
+              method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv" required style="margin-bottom: 12px;">
+            <button type="submit" class="primary">Importar CSV</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Alunos inscritos</h2>
+        <table th:if="${!#lists.isEmpty(students)}">
+            <thead>
+            <tr>
+                <th>Aluno</th>
+                <th>E-mail</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="offerStudent : ${students}">
+                <td th:text="${offerStudent.student.fullName}"></td>
+                <td th:text="${offerStudent.student.email}"></td>
+                <td><span class="status" th:text="${offerStudent.status.displayName}"></span></td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${#lists.isEmpty(students)}">Nenhum aluno inscrito nesta oferta ainda.</p>
+    </div>
+
+    <a th:href="@{/secretary/offers}" class="secondary">Voltar para ofertas</a>
+</div>
+</body>
+</html>

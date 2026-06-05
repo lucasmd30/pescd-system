@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Minhas Ofertas - PESCD</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+            margin: 0;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 48px auto;
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, .08);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            gap: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #1976d2;
+            color: white;
+            text-align: left;
+            padding: 14px;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        a, button {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .primary {
+            background: #1976d2;
+            color: white;
+        }
+
+        .secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .flash-success {
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+        }
+
+        .empty {
+            color: #6b7280;
+            padding: 16px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div>
+            <h1>Minhas ofertas</h1>
+            <p>Acompanhe o status do seu estágio em cada oferta.</p>
+        </div>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="secondary">Logout</button>
+        </form>
+    </div>
+
+    <div th:if="${successMessage}" class="flash-success" th:text="${successMessage}"></div>
+
+    <table th:if="${!#lists.isEmpty(enrollments)}">
+        <thead>
+        <tr>
+            <th>Oferta</th>
+            <th>Semestre</th>
+            <th>Início</th>
+            <th>Fim</th>
+            <th>Professor responsável</th>
+            <th>Status da oferta</th>
+            <th>Meu status</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="enrollment : ${enrollments}">
+            <td th:text="${enrollment.offer.name}"></td>
+            <td th:text="${enrollment.offer.semester}"></td>
+            <td th:text="${#temporals.format(enrollment.offer.startDate, 'dd/MM/yyyy')}"></td>
+            <td th:text="${#temporals.format(enrollment.offer.endDate, 'dd/MM/yyyy')}"></td>
+            <td th:text="${enrollment.offer.responsibleProfessor != null
+                         ? enrollment.offer.responsibleProfessor.fullName : 'Não definido'}"></td>
+            <td><span class="status" th:text="${enrollment.offer.status.displayName}"></span></td>
+            <td><span class="status" th:text="${enrollment.status.displayName}"></span></td>
+            <td>
+                <a class="primary" th:href="@{/aluno/ofertas/{id}(id=${enrollment.id})}">Ver detalhes</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p th:if="${#lists.isEmpty(enrollments)}" class="empty">
+        Você ainda não está inscrito em nenhuma oferta.
+    </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes da Oferta - PESCD</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+            margin: 0;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 48px auto;
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, .08);
+        }
+
+        h1 {
+            margin-bottom: 24px;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        .card {
+            margin-bottom: 24px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            background: #fafafa;
+        }
+
+        p {
+            margin: 8px 0;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        a, button {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 18px;
+            font-size: 15px;
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .primary {
+            background: #1976d2;
+            color: white;
+        }
+
+        .secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .flash-success {
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+        }
+
+        .timeline {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .timeline li {
+            padding: 10px 0;
+            border-bottom: 1px dashed #e5e7eb;
+        }
+
+        .muted {
+            color: #6b7280;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Detalhes da oferta</h1>
+
+    <div th:if="${successMessage}" class="flash-success" th:text="${successMessage}"></div>
+
+    <div class="card">
+        <h2 th:text="${enrollment.offer.name}"></h2>
+        <p><strong>Semestre:</strong> <span th:text="${enrollment.offer.semester}"></span></p>
+        <p>
+            <strong>Período:</strong>
+            <span th:text="${#temporals.format(enrollment.offer.startDate, 'dd/MM/yyyy')}"></span>
+            a
+            <span th:text="${#temporals.format(enrollment.offer.endDate, 'dd/MM/yyyy')}"></span>
+        </p>
+        <p>
+            <strong>Professor responsável:</strong>
+            <span th:text="${enrollment.offer.responsibleProfessor != null
+                         ? enrollment.offer.responsibleProfessor.fullName : 'Não definido'}"></span>
+        </p>
+        <p><strong>Status da oferta:</strong>
+            <span class="status" th:text="${enrollment.offer.status.displayName}"></span></p>
+        <p><strong>Meu status:</strong>
+            <span class="status" th:text="${enrollment.status.displayName}"></span></p>
+    </div>
+
+    <div class="card" th:if="${enrollment.offer.status.name() == 'EM_ANDAMENTO'
+                              and (enrollment.status.name() == 'NAO_ENVIADO'
+                                   or enrollment.status.name() == 'PLANO_APROVADO')}">
+        <h2>Ações disponíveis</h2>
+        <div class="actions">
+            <a class="primary" th:if="${enrollment.status.name() == 'NAO_ENVIADO'}"
+               th:href="@{/aluno/ofertas/{id}/plano(id=${enrollment.id})}">Enviar plano de trabalho</a>
+            <a class="primary" th:if="${enrollment.status.name() == 'NAO_ENVIADO'}"
+               th:href="@{/aluno/ofertas/{id}/documentacao(id=${enrollment.id})}">Enviar documentação</a>
+            <a class="primary" th:if="${enrollment.status.name() == 'PLANO_APROVADO'}"
+               th:href="@{/aluno/ofertas/{id}/relatorio(id=${enrollment.id})}">Enviar relatório final</a>
+        </div>
+    </div>
+
+    <div class="card" th:if="${workPlan != null}">
+        <h2>Plano de trabalho</h2>
+        <p><strong>Código da disciplina:</strong> <span th:text="${workPlan.disciplineCode}"></span></p>
+        <p><strong>Nome da disciplina:</strong> <span th:text="${workPlan.disciplineName}"></span></p>
+        <p><strong>Curso:</strong> <span th:text="${workPlan.disciplineCourse}"></span></p>
+        <p><strong>Professor supervisor:</strong>
+            <span th:text="${enrollment.supervisor != null ? enrollment.supervisor.fullName : '-'}"></span></p>
+        <p><a class="secondary" th:href="@{/aluno/ofertas/{id}/plano/arquivo(id=${enrollment.id})}"
+              target="_blank">Abrir PDF do plano</a></p>
+    </div>
+
+    <div class="card" th:if="${documentation != null}">
+        <h2>Documentação comprobatória</h2>
+        <p><strong>Instituição:</strong> <span th:text="${documentation.institutionName}"></span></p>
+        <p><strong>Disciplina:</strong> <span th:text="${documentation.disciplineName}"></span></p>
+        <p><strong>Curso:</strong> <span th:text="${documentation.disciplineCourse}"></span></p>
+        <p><strong>Carga horária:</strong> <span th:text="${documentation.workloadHours}"></span> h</p>
+        <p><a class="secondary" th:href="@{/aluno/ofertas/{id}/documentacao/arquivo(id=${enrollment.id})}"
+              target="_blank">Abrir PDF da documentação</a></p>
+    </div>
+
+    <div class="card" th:if="${report != null}">
+        <h2>Relatório final</h2>
+        <p><strong>Frequência:</strong> <span th:text="${report.frequency}"></span>%</p>
+        <p><a class="secondary" th:href="@{/aluno/ofertas/{id}/relatorio/arquivo(id=${enrollment.id})}"
+              target="_blank">Abrir PDF do relatório</a></p>
+    </div>
+
+    <div class="card">
+        <h2>Histórico de status</h2>
+        <ul class="timeline" th:if="${!#lists.isEmpty(logs)}">
+            <li th:each="log : ${logs}">
+                <span th:text="${log.description}"></span>
+                <span class="status" th:text="${log.newStatus.displayName}"></span>
+                <span class="muted" th:text="${#temporals.format(log.changedAt, 'dd/MM/yyyy HH:mm')}"></span>
+            </li>
+        </ul>
+        <p class="muted" th:if="${#lists.isEmpty(logs)}">Nenhuma mudança de status registrada.</p>
+    </div>
+
+    <a th:href="@{/aluno/ofertas}" class="secondary">Voltar para minhas ofertas</a>
+</div>
+</body>
+</html>

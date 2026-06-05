@@ -110,7 +110,7 @@
         <p>
             <strong>Status:</strong>
             <span class="status"
-                  th:text="${offer.status}">
+                  th:text="${offer.status.displayName}">
             </span>
         </p>
 
@@ -128,7 +128,9 @@
 
         <h2>Alunos Inscritos</h2>
 
-        <table>
+        <p th:if="${#lists.isEmpty(students)}">Nenhum aluno inscrito nesta oferta.</p>
+
+        <table th:if="${!#lists.isEmpty(students)}">
 
             <thead>
             <tr>
@@ -145,7 +147,7 @@
 
                 <td>
                     <span class="status"
-                          th:text="${offerStudent.status}">
+                          th:text="${offerStudent.status.displayName}">
                     </span>
                 </td>
 
@@ -156,6 +158,10 @@
         </table>
 
     </div>
+
+    <a class="btn" th:href="@{/secretary/offers/{id}/students(id=${offer.id})}">
+        Gerenciar alunos
+    </a>
 
     <a class="btn" th:href="@{/secretary/offers}">
         Voltar
