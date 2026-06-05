@@ -32,7 +32,7 @@ public class RoleBasedAuthenticationSuccessHandler implements AuthenticationSucc
         }
 
         if (authorities.contains("ROLE_SECRETARIO")) {
-            response.sendRedirect(request.getContextPath() + "/dashboard/secretario");
+            response.sendRedirect(request.getContextPath() + "/secretary/offers");
             return;
         }
 
