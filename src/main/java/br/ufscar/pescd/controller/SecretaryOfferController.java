@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
@@ -46,5 +47,13 @@ public class SecretaryOfferController {
         model.addAttribute("students", students);
 
         return "secretary/offers/details";
+    }
+
+    @PostMapping("/{id}/close")
+    public String closeOffer(@PathVariable Long id) {
+
+        secretaryOfferService.closeOffer(id);
+
+        return "redirect:/secretary/offers";
     }
 }

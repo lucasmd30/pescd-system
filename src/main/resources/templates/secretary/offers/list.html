@@ -64,6 +64,7 @@
             padding: 8px 14px;
             border-radius: 8px;
             transition: .2s;
+            cursor:pointer;
         }
 
         .btn:hover {
@@ -107,10 +108,22 @@
             </td>
 
             <td>
+
                 <a class="btn"
                    th:href="@{/secretary/offers/{id}(id=${offer.id})}">
                     Ver Detalhes
                 </a>
+
+                <form th:action="@{/secretary/offers/{id}/close(id=${offer.id})}"
+                      method="post"
+                      style="display:inline; margin-left:8px;">
+
+                    <button type="submit" class="btn">
+                        Encerrar
+                    </button>
+
+                </form>
+
             </td>
 
         </tr>

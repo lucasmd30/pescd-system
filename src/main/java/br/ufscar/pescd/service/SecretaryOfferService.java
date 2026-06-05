@@ -23,6 +23,7 @@ public class SecretaryOfferService {
         this.offerStudentRepository = offerStudentRepository;
     }
 
+
     @Transactional(readOnly = true)
     public List<Offer> listOffers() {
         return offerRepository.findAllByOrderBySemesterDesc();
@@ -41,5 +42,15 @@ public class SecretaryOfferService {
         Offer offer = getOffer(offerId);
 
         return offerStudentRepository.findByOffer(offer);
+    }
+
+    @Transactional
+    public void closeOffer(Long id) {
+
+        Offer offer = getOffer(id);
+
+        offer.setStatus(br.ufscar.pescd.enums.OfferStatus.CONCLUIDA);
+
+        offerRepository.save(offer);
     }
 }
