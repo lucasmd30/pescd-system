@@ -1,5 +1,6 @@
 package br.ufscar.pescd.entity;
 
+import br.ufscar.pescd.enums.GradeOption;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -47,6 +48,20 @@ public class Documentation {
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime submittedAt;
+
+    // -------------------------------------------------------------------------
+    // Campos preenchidos pelo Professor Responsável (PR.02)
+    // -------------------------------------------------------------------------
+
+    @Column(columnDefinition = "TEXT")
+    private String responsavelParecer;
+
+    private Integer responsavelFrequencia;
+
+    @Enumerated(EnumType.STRING)
+    private GradeOption responsavelNota;
+
+    private LocalDateTime responsavelApprovedAt;
 
     @PrePersist
     protected void onCreate() {

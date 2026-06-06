@@ -1,5 +1,6 @@
 package br.ufscar.pescd.service;
 
+import br.ufscar.pescd.dto.AnalyzeDocumentationFormDTO;
 import br.ufscar.pescd.dto.ConcludeReportFormDTO;
 import br.ufscar.pescd.dto.ResponsavelDashboardDTO;
 import br.ufscar.pescd.entity.*;
@@ -21,17 +22,20 @@ public class ProfessorResponsavelService {
     private final OfferStudentRepository offerStudentRepository;
     private final WorkPlanRepository workPlanRepository;
     private final ReportRepository reportRepository;
+    private final DocumentationRepository documentationRepository;
     private final StatusChangeLogRepository statusChangeLogRepository;
 
     public ProfessorResponsavelService(
             OfferStudentRepository offerStudentRepository,
             WorkPlanRepository workPlanRepository,
             ReportRepository reportRepository,
+            DocumentationRepository documentationRepository,
             StatusChangeLogRepository statusChangeLogRepository
     ) {
         this.offerStudentRepository = offerStudentRepository;
         this.workPlanRepository = workPlanRepository;
         this.reportRepository = reportRepository;
+        this.documentationRepository = documentationRepository;
         this.statusChangeLogRepository = statusChangeLogRepository;
     }
 
@@ -117,6 +121,39 @@ public class ProfessorResponsavelService {
 
         changeStatus(os, StudentOfferStatus.CONCLUIDO_RESPONSAVEL,
                 "Relatório concluído pelo professor responsável");
+    }
+
+    // -------------------------------------------------------------------------
+    // PR.02 — Analisar Documentação
+    // -------------------------------------------------------------------------
+
+    @Transactional(readOnly = true)
+    public Documentation getDocumentation(OfferStudent offerStudent) {
+        return documentationRepository.findByOfferStudent(offerStudent)
+                .orElseThrow(() -> new IllegalArgumentException("Documentação não encontrada."));
+    }
+
+    @Transactional
+    public void analyzeDocumentation(Long offerId, Long studentId, User professor,
+                                     AnalyzeDocumentationFormDTO form) {
+
+        OfferStudent os = getEnrollmentForResponsavel(offerId, studentId, professor);
+
+        if (os.getStatus() != StudentOfferStatus.DOCUMENTACAO_ENVIADA) {
+            throw new IllegalArgumentException(
+                    "Ação indisponível: o status atual é \""
+                    + os.getStatus().getDisplayName() + "\".");
+        }
+
+        Documentation doc = getDocumentation(os);
+        doc.setResponsavelParecer(form.getParecer());
+        doc.setResponsavelFrequencia(form.getFrequencia());
+        doc.setResponsavelNota(form.getNota());
+        doc.setResponsavelApprovedAt(LocalDateTime.now());
+        documentationRepository.save(doc);
+
+        changeStatus(os, StudentOfferStatus.CONCLUIDO_RESPONSAVEL,
+                "Documentação analisada pelo professor responsável");
     }
 
     // -------------------------------------------------------------------------

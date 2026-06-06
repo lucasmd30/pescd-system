@@ -1,5 +1,6 @@
 package br.ufscar.pescd.controller;
 
+import br.ufscar.pescd.dto.AnalyzeDocumentationFormDTO;
 import br.ufscar.pescd.dto.ConcludeReportFormDTO;
 import br.ufscar.pescd.dto.ResponsavelDashboardDTO;
 import br.ufscar.pescd.entity.*;
@@ -117,6 +118,63 @@ public class ProfessorResponsavelController {
     }
 
     // -------------------------------------------------------------------------
+    // PR.02 — Analisar Documentação
+    // -------------------------------------------------------------------------
+
+    @GetMapping("/ofertas/{offerId}/alunos/{studentId}/analisar-documentacao")
+    public String analyzeDocumentationForm(
+            @PathVariable Long offerId,
+            @PathVariable Long studentId,
+            Model model,
+            Authentication authentication
+    ) {
+        User professor = resolveUser(authentication);
+
+        OfferStudent os = professorResponsavelService
+                .getEnrollmentForResponsavel(offerId, studentId, professor);
+
+        Documentation doc = professorResponsavelService.getDocumentation(os);
+
+        model.addAttribute("offerStudent", os);
+        model.addAttribute("documentation", doc);
+        model.addAttribute("statusLogs", professorResponsavelService.getStatusLogs(os));
+        model.addAttribute("gradeOptions", GradeOption.values());
+        model.addAttribute("form", new AnalyzeDocumentationFormDTO());
+
+        return "professor/responsavel/analyze-documentation";
+    }
+
+    @PostMapping("/ofertas/{offerId}/alunos/{studentId}/analisar-documentacao")
+    public String analyzeDocumentation(
+            @PathVariable Long offerId,
+            @PathVariable Long studentId,
+            @Valid @ModelAttribute("form") AnalyzeDocumentationFormDTO form,
+            BindingResult bindingResult,
+            Model model,
+            Authentication authentication,
+            RedirectAttributes redirectAttributes
+    ) {
+        User professor = resolveUser(authentication);
+
+        if (bindingResult.hasErrors()) {
+            OfferStudent os = professorResponsavelService
+                    .getEnrollmentForResponsavel(offerId, studentId, professor);
+            model.addAttribute("offerStudent", os);
+            model.addAttribute("documentation", professorResponsavelService.getDocumentation(os));
+            model.addAttribute("statusLogs", professorResponsavelService.getStatusLogs(os));
+            model.addAttribute("gradeOptions", GradeOption.values());
+            return "professor/responsavel/analyze-documentation";
+        }
+
+        professorResponsavelService.analyzeDocumentation(offerId, studentId, professor, form);
+
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Documentação analisada com sucesso.");
+
+        return "redirect:/professor/responsavel/dashboard";
+    }
+
+    // -------------------------------------------------------------------------
     // Downloads
     // -------------------------------------------------------------------------
 
@@ -156,6 +214,25 @@ public class ProfessorResponsavelController {
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "inline; filename=\"" + report.getFileName() + "\"")
                 .body(report.getFileContent());
+    }
+
+    @GetMapping("/ofertas/{offerId}/alunos/{studentId}/documentacao/download")
+    @ResponseBody
+    public ResponseEntity<byte[]> downloadDocumentation(
+            @PathVariable Long offerId,
+            @PathVariable Long studentId,
+            Authentication authentication
+    ) {
+        User professor = resolveUser(authentication);
+        OfferStudent os = professorResponsavelService
+                .getEnrollmentForResponsavel(offerId, studentId, professor);
+        Documentation doc = professorResponsavelService.getDocumentation(os);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(doc.getContentType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + doc.getFileName() + "\"")
+                .body(doc.getFileContent());
     }
 
     // -------------------------------------------------------------------------

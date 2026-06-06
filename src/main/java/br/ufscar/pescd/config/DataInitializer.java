@@ -1,5 +1,6 @@
 package br.ufscar.pescd.config;
 
+import br.ufscar.pescd.entity.Documentation;
 import br.ufscar.pescd.entity.Offer;
 import br.ufscar.pescd.entity.OfferStudent;
 import br.ufscar.pescd.entity.User;
@@ -9,6 +10,7 @@ import br.ufscar.pescd.enums.GradeOption;
 import br.ufscar.pescd.enums.OfferStatus;
 import br.ufscar.pescd.enums.StudentOfferStatus;
 import br.ufscar.pescd.enums.UserRole;
+import br.ufscar.pescd.repository.DocumentationRepository;
 import br.ufscar.pescd.repository.OfferRepository;
 import br.ufscar.pescd.repository.OfferStudentRepository;
 import br.ufscar.pescd.repository.UserRepository;
@@ -30,6 +32,7 @@ public class DataInitializer implements CommandLineRunner {
     private final OfferStudentRepository offerStudentRepository;
     private final WorkPlanRepository workPlanRepository;
     private final ReportRepository reportRepository;
+    private final DocumentationRepository documentationRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DataInitializer(
@@ -38,6 +41,7 @@ public class DataInitializer implements CommandLineRunner {
             OfferStudentRepository offerStudentRepository,
             WorkPlanRepository workPlanRepository,
             ReportRepository reportRepository,
+            DocumentationRepository documentationRepository,
             PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
@@ -45,6 +49,7 @@ public class DataInitializer implements CommandLineRunner {
         this.offerStudentRepository = offerStudentRepository;
         this.workPlanRepository = workPlanRepository;
         this.reportRepository = reportRepository;
+        this.documentationRepository = documentationRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -122,6 +127,10 @@ public class DataInitializer implements CommandLineRunner {
                 aluno1, offer4, professorComin, StudentOfferStatus.RELATORIO_APROVADO_SUPERVISOR);
         seedWorkPlan(seedPR01);
         seedReportWithSupervisorApproval(seedPR01);
+
+        // --- Seed PR.02: João Lima em offer2 com DOCUMENTACAO_ENVIADA (Prof. Naldi é responsável) ---
+        OfferStudent seedPR02 = enroll(aluno3, offer2, StudentOfferStatus.DOCUMENTACAO_ENVIADA);
+        seedDocumentation(seedPR02);
     }
 
     private User upsertUser(
@@ -240,6 +249,25 @@ public class DataInitializer implements CommandLineRunner {
         os.setSupervisor(supervisor);
         os.setStatus(status);
         return offerStudentRepository.save(os);
+    }
+
+    private void seedDocumentation(OfferStudent offerStudent) {
+        if (documentationRepository.findByOfferStudent(offerStudent).isPresent()) {
+            return;
+        }
+
+        Documentation doc = new Documentation();
+        doc.setOfferStudent(offerStudent);
+        doc.setInstitutionName("Universidade Federal de São Carlos");
+        doc.setDisciplineName("Aprendizado de Máquina I");
+        doc.setDisciplineCourse("Bacharelado em Ciência da Computação");
+        doc.setWorkloadHours(60);
+        doc.setFileName("documentacao-exemplo.pdf");
+        doc.setContentType("application/pdf");
+        doc.setFileContent(
+                "%PDF-1.4\n% Documentação comprobatória de exemplo (PESCD)\n"
+                        .getBytes(StandardCharsets.UTF_8));
+        documentationRepository.save(doc);
     }
 
     private void removeLegacyMockOffers() {
