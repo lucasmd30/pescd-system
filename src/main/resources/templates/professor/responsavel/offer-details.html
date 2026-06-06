@@ -125,8 +125,20 @@
 
         <h2>Alunos Inscritos</h2>
 
+        <form method="get" style="margin-bottom:20px;">
+            <input type="text"
+                   name="nome"
+                   placeholder="Buscar aluno pelo nome"
+                   th:value="${nome}"
+                   style="padding:8px; width:300px;">
+
+            <button type="submit" class="btn">
+                Buscar
+            </button>
+        </form>
+
         <p th:if="${#lists.isEmpty(students)}">
-            Nenhum aluno inscrito nesta oferta.
+            Nenhum aluno encontrado.
         </p>
 
         <table th:if="${!#lists.isEmpty(students)}">

@@ -44,6 +44,7 @@ public class ProfessorResponsavelController {
     @GetMapping("/ofertas/{offerId}")
     public String offerDetails(
             @PathVariable Long offerId,
+            @RequestParam(required = false) String nome,
             Authentication authentication,
             Model model
     ) {
@@ -58,12 +59,23 @@ public class ProfessorResponsavelController {
             );
         }
 
-        model.addAttribute("offer", offer);
+        List<OfferStudent> students =
+                professorResponsavelService.getOfferStudents(offerId);
 
-        model.addAttribute(
-                "students",
-                professorResponsavelService.getOfferStudents(offerId)
-        );
+        if (nome != null && !nome.isBlank()) {
+
+            students = students.stream()
+                    .filter(os ->
+                            os.getStudent()
+                                    .getFullName()
+                                    .toLowerCase()
+                                    .contains(nome.toLowerCase()))
+                    .toList();
+        }
+
+        model.addAttribute("offer", offer);
+        model.addAttribute("students", students);
+        model.addAttribute("nome", nome);
 
         return "professor/responsavel/offer-details";
     }
