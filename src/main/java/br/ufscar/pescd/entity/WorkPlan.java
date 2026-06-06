@@ -45,6 +45,13 @@ public class WorkPlan {
     @Column(nullable = false, updatable = false)
     private LocalDateTime submittedAt;
 
+    /** Preenchido pelo professor supervisor ao aprovar o plano (PS.02). */
+    @Column(columnDefinition = "TEXT")
+    private String supervisorParecer;
+
+    /** Timestamp da aprovação pelo supervisor (PS.02). */
+    private LocalDateTime supervisorApprovedAt;
+
     @PrePersist
     protected void onCreate() {
         this.submittedAt = LocalDateTime.now();

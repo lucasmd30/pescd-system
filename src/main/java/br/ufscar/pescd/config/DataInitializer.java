@@ -93,22 +93,17 @@ public class DataInitializer implements CommandLineRunner {
         );
 
         enroll(aluno1, offer1, StudentOfferStatus.NAO_ENVIADO);
-        OfferStudent aluno2Offer1 =
-                enroll(aluno2, offer1, StudentOfferStatus.PLANO_APROVADO);
+        enroll(aluno2, offer1, StudentOfferStatus.NAO_ENVIADO);
         enroll(aluno3, offer2, StudentOfferStatus.NAO_ENVIADO);
-        enroll(aluno4, offer2, StudentOfferStatus.PLANO_APROVADO);
-        enroll(aluno1, offer3, StudentOfferStatus.PLANO_APROVADO);
+        enroll(aluno4, offer2, StudentOfferStatus.NAO_ENVIADO);
+        enroll(aluno1, offer3, StudentOfferStatus.NAO_ENVIADO);
         enroll(aluno4, offer3, StudentOfferStatus.NAO_ENVIADO);
-        enroll(aluno2, offer4, StudentOfferStatus.CONCLUIDO_RESPONSAVEL);
+        enroll(aluno2, offer4, StudentOfferStatus.NAO_ENVIADO);
 
-        if (aluno2Offer1 != null) {
-            aluno2Offer1.setSupervisor(professorNaldi);
-            offerStudentRepository.save(aluno2Offer1);
-            seedWorkPlan(aluno2Offer1);
-        }
-
-        // --- Seed PS.01 / PS.02: aluno com PLANO_ENVIADO sob supervisão de professorLevada ---
-        enrollWithSupervisor(aluno3, offer1, professorLevada, StudentOfferStatus.PLANO_ENVIADO);
+        // --- Seed PS.01 / PS.02: João Lima em offer1 com PLANO_ENVIADO sob supervisão de Prof. Levada ---
+        OfferStudent seedPS02 = enrollWithSupervisor(
+                aluno3, offer1, professorLevada, StudentOfferStatus.PLANO_ENVIADO);
+        seedWorkPlan(seedPS02);
     }
 
     private User upsertUser(
