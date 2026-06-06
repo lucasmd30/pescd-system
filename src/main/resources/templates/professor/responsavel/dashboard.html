@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Responsável — Minhas Ofertas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+            margin: 0;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 48px auto;
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, .08);
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        h1 { margin: 0; font-size: 22px; }
+        .subtitle { margin: 4px 0 0; color: #6b7280; font-size: 14px; }
+
+        .offer-block {
+            margin-bottom: 32px;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .offer-header {
+            background: #166534;
+            color: white;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .offer-header .offer-name { font-size: 16px; font-weight: 600; }
+        .offer-header .offer-meta { font-size: 13px; opacity: .85; }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        th {
+            background: #f1f5f9;
+            color: #374151;
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        .status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-relatorio_aprovado_supervisor { background: #dbeafe; color: #1d4ed8; }
+        .status-documentacao_enviada          { background: #fef9c3; color: #854d0e; }
+        .status-concluido_responsavel         { background: #dcfce7; color: #166534; }
+        .status-plano_enviado                 { background: #fef9c3; color: #854d0e; }
+        .status-plano_aprovado                { background: #dcfce7; color: #166534; }
+        .status-relatorio_enviado             { background: #fef9c3; color: #854d0e; }
+        .status-nao_enviado                   { background: #f3f4f6; color: #6b7280; }
+
+        .btn {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary   { background: #166534; color: white; }
+        .btn-secondary { background: #e5e7eb; color: #111827; }
+        .btn-primary:hover   { background: #14532d; }
+        .btn-secondary:hover { background: #d1d5db; }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div th:if="${successMessage}" class="alert-success" th:text="${successMessage}"></div>
+
+    <div class="topbar">
+        <div>
+            <h1>Minhas Ofertas (Responsável)</h1>
+            <p class="subtitle" th:text="'Prof. ' + ${professor.fullName}"></p>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <a th:href="@{/dashboard}" class="btn btn-secondary">← Painel</a>
+            <form th:action="@{/logout}" method="post" style="margin:0;">
+                <button type="submit" class="btn btn-secondary">Logout</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="empty-state" th:if="${#lists.isEmpty(dashboard)}">
+        <strong>Nenhuma oferta encontrada.</strong>
+        <p>Você ainda não está atribuído como professor responsável de nenhuma oferta.</p>
+    </div>
+
+    <div class="offer-block" th:each="item : ${dashboard}">
+
+        <div class="offer-header">
+            <span class="offer-name" th:text="${item.offer.name}"></span>
+            <span class="offer-meta" th:text="${item.offer.semester} + ' · ' + ${item.offer.status}"></span>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Aluno</th>
+                <th>E-mail</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="os : ${item.students}">
+                <td th:text="${os.student.fullName}"></td>
+                <td th:text="${os.student.email}"></td>
+                <td>
+                    <span class="status"
+                          th:classappend="'status-' + ${#strings.toLowerCase(os.status.name())}"
+                          th:text="${os.status.displayName}">
+                    </span>
+                </td>
+                <td>
+                    <!-- PR.01: Concluir Relatório -->
+                    <a th:if="${os.status.name() == 'RELATORIO_APROVADO_SUPERVISOR'}"
+                       th:href="@{/professor/responsavel/ofertas/{oId}/alunos/{sId}/concluir-relatorio(oId=${item.offer.id}, sId=${os.student.id})}"
+                       class="btn btn-primary">
+                        Concluir Relatório
+                    </a>
+
+                    <!-- PR.02: Analisar Documentação -->
+                    <a th:if="${os.status.name() == 'DOCUMENTACAO_ENVIADA'}"
+                       th:href="@{/professor/responsavel/ofertas/{oId}/alunos/{sId}/analisar-documentacao(oId=${item.offer.id}, sId=${os.student.id})}"
+                       class="btn btn-primary">
+                        Analisar Documentação
+                    </a>
+
+                    <span th:if="${os.status.name() != 'RELATORIO_APROVADO_SUPERVISOR'
+                                   and os.status.name() != 'DOCUMENTACAO_ENVIADA'}"
+                          style="color:#9ca3af; font-size:13px;">—</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>

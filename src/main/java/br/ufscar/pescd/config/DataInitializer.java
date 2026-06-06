@@ -5,6 +5,7 @@ import br.ufscar.pescd.entity.OfferStudent;
 import br.ufscar.pescd.entity.User;
 import br.ufscar.pescd.entity.Report;
 import br.ufscar.pescd.entity.WorkPlan;
+import br.ufscar.pescd.enums.GradeOption;
 import br.ufscar.pescd.enums.OfferStatus;
 import br.ufscar.pescd.enums.StudentOfferStatus;
 import br.ufscar.pescd.enums.UserRole;
@@ -115,6 +116,12 @@ public class DataInitializer implements CommandLineRunner {
                 aluno4, offer4, professorEndo, StudentOfferStatus.RELATORIO_ENVIADO);
         seedWorkPlan(seedPS03);
         seedReport(seedPS03);
+
+        // --- Seed PR.01: Lucas Ferreira em offer4 com RELATORIO_APROVADO_SUPERVISOR (Prof. Endo é responsável) ---
+        OfferStudent seedPR01 = enrollWithSupervisor(
+                aluno1, offer4, professorComin, StudentOfferStatus.RELATORIO_APROVADO_SUPERVISOR);
+        seedWorkPlan(seedPR01);
+        seedReportWithSupervisorApproval(seedPR01);
     }
 
     private User upsertUser(
@@ -196,6 +203,26 @@ public class DataInitializer implements CommandLineRunner {
         report.setContentType("application/pdf");
         report.setFileContent(
                 "%PDF-1.4\n% Relatório de exemplo (PESCD)\n".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        reportRepository.save(report);
+    }
+
+    private void seedReportWithSupervisorApproval(OfferStudent offerStudent) {
+        if (reportRepository.findByOfferStudent(offerStudent).isPresent()) {
+            return;
+        }
+
+        Report report = new Report();
+        report.setOfferStudent(offerStudent);
+        report.setFrequency(90);
+        report.setFileName("relatorio-exemplo.pdf");
+        report.setContentType("application/pdf");
+        report.setFileContent(
+                "%PDF-1.4\n% Relatório de exemplo (PESCD)\n".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        // Dados do supervisor (simulando PS.03 já concluído)
+        report.setSupervisorParecer("Relatório bem elaborado. Aluno demonstrou domínio do conteúdo.");
+        report.setSupervisorFrequencia(88);
+        report.setSupervisorNotaSugestao(GradeOption.B);
+        report.setSupervisorApprovedAt(java.time.LocalDateTime.now().minusDays(3));
         reportRepository.save(report);
     }
 

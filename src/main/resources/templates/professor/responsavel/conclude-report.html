@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Concluir Relatório</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f5f7fa; margin: 0; color: #1f2937; }
+
+        .container {
+            max-width: 820px;
+            margin: 48px auto;
+            background: white;
+            border-radius: 16px;
+            padding: 36px;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, .08);
+        }
+
+        h1 { font-size: 20px; margin: 0 0 4px; }
+        .subtitle { color: #6b7280; font-size: 14px; margin: 0 0 28px; }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: #6b7280;
+            margin: 28px 0 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: #9ca3af;
+            margin-bottom: 2px;
+        }
+
+        .info-item span { font-size: 14px; color: #111827; }
+
+        .supervisor-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        .supervisor-box .supervisor-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: #1d4ed8;
+            margin-bottom: 10px;
+        }
+
+        .supervisor-row {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .supervisor-row span { font-size: 14px; }
+        .supervisor-row strong { font-size: 12px; color: #6b7280; margin-right: 4px; }
+
+        .supervisor-parecer {
+            font-size: 14px;
+            color: #374151;
+            white-space: pre-wrap;
+            margin-top: 8px;
+        }
+
+        .pdf-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            padding: 9px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #1976d2;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .pdf-link:hover { background: #e2e8f0; }
+
+        .log-list { list-style: none; padding: 0; margin: 0; }
+        .log-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
+        }
+        .log-list li:last-child { border-bottom: none; }
+        .log-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #166534; margin-top: 5px; flex-shrink: 0;
+        }
+        .log-date { color: #6b7280; font-size: 12px; }
+
+        .form-group { margin-top: 18px; }
+        .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+
+        textarea, select, input[type="number"] {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 14px;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        textarea { resize: vertical; min-height: 110px; }
+
+        textarea:focus, select:focus, input:focus {
+            outline: none;
+            border-color: #166534;
+            box-shadow: 0 0 0 3px rgba(22,101,52,.15);
+        }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .error { color: #dc2626; font-size: 12px; margin-top: 4px; }
+
+        .actions { display: flex; gap: 12px; margin-top: 28px; }
+
+        .btn {
+            padding: 11px 22px; border-radius: 8px; font-size: 14px;
+            font-weight: 600; border: none; cursor: pointer;
+            text-decoration: none; display: inline-block;
+        }
+
+        .btn-primary   { background: #166534; color: white; }
+        .btn-secondary { background: #e5e7eb; color: #111827; }
+        .btn-primary:hover   { background: #14532d; }
+        .btn-secondary:hover { background: #d1d5db; }
+
+        .alert-success {
+            background: #dcfce7; color: #166534;
+            border: 1px solid #bbf7d0; border-radius: 8px;
+            padding: 12px 16px; margin-bottom: 20px; font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div th:if="${successMessage}" class="alert-success" th:text="${successMessage}"></div>
+
+    <h1>Concluir Relatório Final</h1>
+    <p class="subtitle"
+       th:text="'Aluno: ' + ${offerStudent.student.fullName}
+                + ' · Oferta: ' + ${offerStudent.offer.name}">
+    </p>
+
+    <!-- Plano de Trabalho -->
+    <div class="section-title">Plano de Trabalho</div>
+    <div class="info-grid">
+        <div class="info-item">
+            <label>Código da Disciplina</label>
+            <span th:text="${workPlan.disciplineCode}"></span>
+        </div>
+        <div class="info-item">
+            <label>Nome da Disciplina</label>
+            <span th:text="${workPlan.disciplineName}"></span>
+        </div>
+        <div class="info-item" style="grid-column: span 2;">
+            <label>Curso</label>
+            <span th:text="${workPlan.disciplineCourse}"></span>
+        </div>
+    </div>
+    <a class="pdf-link"
+       th:href="@{/professor/responsavel/ofertas/{oId}/alunos/{sId}/plano/download(oId=${offerStudent.offer.id}, sId=${offerStudent.student.id})}"
+       target="_blank">
+        📄 Visualizar PDF do Plano
+    </a>
+
+    <!-- Relatório + Avaliação do Supervisor -->
+    <div class="section-title">Relatório e Avaliação do Supervisor</div>
+    <div class="info-grid" style="margin-bottom: 12px;">
+        <div class="info-item">
+            <label>Frequência indicada pelo aluno</label>
+            <span th:text="${report.frequency} + '%'"></span>
+        </div>
+        <div class="info-item">
+            <label>Enviado em</label>
+            <span th:text="${#temporals.format(report.submittedAt, 'dd/MM/yyyy HH:mm')}"></span>
+        </div>
+    </div>
+    <a class="pdf-link"
+       th:href="@{/professor/responsavel/ofertas/{oId}/alunos/{sId}/relatorio/download(oId=${offerStudent.offer.id}, sId=${offerStudent.student.id})}"
+       target="_blank">
+        📄 Visualizar PDF do Relatório
+    </a>
+
+    <div class="supervisor-box" style="margin-top: 14px;">
+        <div class="supervisor-label">Avaliação do Professor Supervisor</div>
+        <div class="supervisor-row">
+            <span><strong>Frequência:</strong>
+                <span th:text="${report.supervisorFrequencia} + '%'"></span>
+            </span>
+            <span><strong>Sugestão de nota:</strong>
+                <span th:text="${report.supervisorNotaSugestao?.displayName}"></span>
+            </span>
+            <span><strong>Aprovado em:</strong>
+                <span th:text="${report.supervisorApprovedAt != null ?
+                    #temporals.format(report.supervisorApprovedAt, 'dd/MM/yyyy HH:mm') : '—'}">
+                </span>
+            </span>
+        </div>
+        <div class="supervisor-parecer" th:text="${report.supervisorParecer}"></div>
+    </div>
+
+    <!-- Histórico de status -->
+    <div class="section-title">Histórico de Status</div>
+    <ul class="log-list">
+        <li th:each="log : ${statusLogs}">
+            <span class="log-dot"></span>
+            <div>
+                <strong th:text="${log.newStatus.displayName}"></strong>
+                <span th:if="${log.description != null}"
+                      th:text="' — ' + ${log.description}"></span>
+                <br>
+                <span class="log-date"
+                      th:text="${#temporals.format(log.changedAt, 'dd/MM/yyyy HH:mm')}">
+                </span>
+            </div>
+        </li>
+        <li th:if="${#lists.isEmpty(statusLogs)}" style="color:#9ca3af;">
+            Nenhum histórico registrado.
+        </li>
+    </ul>
+
+    <!-- Formulário de conclusão -->
+    <div class="section-title">Parecer do Professor Responsável</div>
+
+    <form th:action="@{/professor/responsavel/ofertas/{oId}/alunos/{sId}/concluir-relatorio(oId=${offerStudent.offer.id}, sId=${offerStudent.student.id})}"
+          th:object="${form}"
+          method="post">
+
+        <div class="form-group">
+            <label for="parecer">Parecer *</label>
+            <textarea id="parecer"
+                      th:field="*{parecer}"
+                      placeholder="Descreva seu parecer final sobre o relatório...">
+            </textarea>
+            <p class="error" th:if="${#fields.hasErrors('parecer')}" th:errors="*{parecer}"></p>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="frequencia">Frequência (%) *</label>
+                <input type="number"
+                       id="frequencia"
+                       th:field="*{frequencia}"
+                       min="0" max="100"/>
+                <p class="error" th:if="${#fields.hasErrors('frequencia')}" th:errors="*{frequencia}"></p>
+            </div>
+
+            <div class="form-group">
+                <label for="nota">Nota Final *</label>
+                <select id="nota" th:field="*{nota}">
+                    <option value="">— Selecione —</option>
+                    <option th:each="grade : ${gradeOptions}"
+                            th:value="${grade.name()}"
+                            th:text="${grade.displayName}">
+                    </option>
+                </select>
+                <p class="error" th:if="${#fields.hasErrors('nota')}" th:errors="*{nota}"></p>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn btn-primary">✓ Concluir Relatório</button>
+            <a th:href="@{/professor/responsavel/dashboard}" class="btn btn-secondary">Cancelar</a>
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>

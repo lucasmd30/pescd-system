@@ -58,6 +58,24 @@ public class Report {
     /** Timestamp da aprovação pelo supervisor (PS.03). */
     private LocalDateTime supervisorApprovedAt;
 
+    // -------------------------------------------------------------------------
+    // PR.01 — campos preenchidos pelo Professor Responsável
+    // -------------------------------------------------------------------------
+
+    /** Parecer do professor responsável sobre o relatório (PR.01). */
+    @Column(columnDefinition = "TEXT")
+    private String responsavelParecer;
+
+    /** Frequência final confirmada pelo responsável (PR.01). */
+    private Integer responsavelFrequencia;
+
+    /** Nota final atribuída pelo responsável (PR.01). */
+    @Enumerated(EnumType.STRING)
+    private GradeOption responsavelNota;
+
+    /** Timestamp da conclusão pelo responsável (PR.01). */
+    private LocalDateTime responsavelApprovedAt;
+
     @PrePersist
     protected void onCreate() {
         this.submittedAt = LocalDateTime.now();

@@ -23,4 +23,6 @@ public interface OfferStudentRepository extends JpaRepository<OfferStudent, Long
     List<OfferStudent> findBySupervisor(User supervisor);
 
     Optional<OfferStudent> findByOffer_IdAndStudent_Id(Long offerId, Long studentId);
+
+    List<OfferStudent> findByOffer_ResponsibleProfessor(User responsibleProfessor);
 }
