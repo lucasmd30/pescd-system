@@ -4,6 +4,7 @@ import br.ufscar.pescd.dto.AnalyzeDocumentationFormDTO;
 import br.ufscar.pescd.dto.ConcludeReportFormDTO;
 import br.ufscar.pescd.dto.ResponsavelDashboardDTO;
 import br.ufscar.pescd.entity.*;
+import br.ufscar.pescd.enums.OfferStatus;
 import br.ufscar.pescd.enums.StudentOfferStatus;
 import br.ufscar.pescd.repository.*;
 import org.springframework.security.access.AccessDeniedException;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 @Service
 public class ProfessorResponsavelService {
 
+    private final OfferRepository offerRepository;
     private final OfferStudentRepository offerStudentRepository;
     private final WorkPlanRepository workPlanRepository;
     private final ReportRepository reportRepository;
@@ -30,13 +32,15 @@ public class ProfessorResponsavelService {
             WorkPlanRepository workPlanRepository,
             ReportRepository reportRepository,
             DocumentationRepository documentationRepository,
-            StatusChangeLogRepository statusChangeLogRepository
+            StatusChangeLogRepository statusChangeLogRepository,
+            OfferRepository offerRepository
     ) {
         this.offerStudentRepository = offerStudentRepository;
         this.workPlanRepository = workPlanRepository;
         this.reportRepository = reportRepository;
         this.documentationRepository = documentationRepository;
         this.statusChangeLogRepository = statusChangeLogRepository;
+        this.offerRepository = offerRepository;
     }
 
     // -------------------------------------------------------------------------
@@ -131,6 +135,48 @@ public class ProfessorResponsavelService {
     public Documentation getDocumentation(OfferStudent offerStudent) {
         return documentationRepository.findByOfferStudent(offerStudent)
                 .orElseThrow(() -> new IllegalArgumentException("Documentação não encontrada."));
+    }
+
+    @Transactional(readOnly = true)
+    public Offer getOffer(Long offerId) {
+
+        return offerRepository.findById(offerId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Oferta não encontrada."));
+    }
+
+    @Transactional
+    public void closeOffer(
+            Long offerId,
+            User professor,
+            String lessonsLearned
+    ) {
+
+        Offer offer = getOffer(offerId);
+
+        if (!offer.getResponsibleProfessor().getId().equals(professor.getId())) {
+            throw new IllegalArgumentException(
+                    "Você não é o responsável por esta oferta."
+            );
+        }
+
+        List<OfferStudent> students =
+                offerStudentRepository.findByOffer(offer);
+
+        boolean allFinished = students.stream()
+                .allMatch(s ->
+                        s.getStatus() == StudentOfferStatus.CONCLUIDO_RESPONSAVEL);
+
+        if (!allFinished) {
+            throw new IllegalArgumentException(
+                    "Todos os alunos devem estar concluídos antes do encerramento."
+            );
+        }
+
+        offer.setLessonsLearned(lessonsLearned);
+        offer.setStatus(OfferStatus.AGUARDANDO_ENCERRAMENTO_SECRETARIO);
+
+        offerRepository.save(offer);
     }
 
     @Transactional

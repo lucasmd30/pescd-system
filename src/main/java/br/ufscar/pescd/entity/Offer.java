@@ -40,6 +40,9 @@ public class Offer {
 
     private LocalDateTime closedAt;
 
+    @Column(columnDefinition = "TEXT")
+    private String lessonsLearned;
+
     @ManyToOne
     @JoinColumn(name = "created_by_id")
     private User createdBy;

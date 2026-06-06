@@ -17,6 +17,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import br.ufscar.pescd.dto.CloseOfferFormDTO;
+import br.ufscar.pescd.entity.Offer;
 
 import java.util.List;
 
@@ -170,6 +172,70 @@ public class ProfessorResponsavelController {
 
         redirectAttributes.addFlashAttribute("successMessage",
                 "Documentação analisada com sucesso.");
+
+        return "redirect:/professor/responsavel/dashboard";
+    }
+
+    @GetMapping("/ofertas/{offerId}/encerrar")
+    public String closeOfferForm(
+            @PathVariable Long offerId,
+            Model model,
+            Authentication authentication
+    ) {
+
+        User professor = resolveUser(authentication);
+
+        Offer offer = professorResponsavelService.getOffer(offerId);
+
+        model.addAttribute("offer", offer);
+        model.addAttribute("form", new CloseOfferFormDTO());
+
+        return "professor/responsavel/close-offer";
+    }
+
+    @PostMapping("/ofertas/{offerId}/encerrar")
+    public String closeOffer(
+            @PathVariable Long offerId,
+            @Valid @ModelAttribute("form") CloseOfferFormDTO form,
+            BindingResult bindingResult,
+            Authentication authentication,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
+
+        User professor = resolveUser(authentication);
+
+        if (bindingResult.hasErrors()) {
+
+            model.addAttribute(
+                    "offer",
+                    professorResponsavelService.getOffer(offerId)
+            );
+
+            return "professor/responsavel/close-offer";
+        }
+
+        try {
+
+            professorResponsavelService.closeOffer(
+                    offerId,
+                    professor,
+                    form.getLessonsLearned()
+            );
+
+            redirectAttributes.addFlashAttribute(
+                    "successMessage",
+                    "Oferta enviada para encerramento."
+            );
+
+        } catch (IllegalArgumentException ex) {
+
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    ex.getMessage()
+            );
+
+        }
 
         return "redirect:/professor/responsavel/dashboard";
     }

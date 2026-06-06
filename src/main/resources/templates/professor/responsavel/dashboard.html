@@ -115,13 +115,31 @@
             margin-bottom: 20px;
             font-size: 14px;
         }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
 
-    <div th:if="${successMessage}" class="alert-success" th:text="${successMessage}"></div>
+    <div th:if="${successMessage}"
+         class="alert-success"
+         th:text="${successMessage}">
+    </div>
+
+    <div th:if="${errorMessage}"
+         class="alert-error"
+         th:text="${errorMessage}">
+    </div>
 
     <div class="topbar">
         <div>
@@ -146,6 +164,13 @@
         <div class="offer-header">
             <span class="offer-name" th:text="${item.offer.name}"></span>
             <span class="offer-meta" th:text="${item.offer.semester} + ' · ' + ${item.offer.status}"></span>
+        </div>
+
+        <div style="padding:15px;">
+            <a th:href="@{/professor/responsavel/ofertas/{id}/encerrar(id=${item.offer.id})}"
+               class="btn btn-primary">
+                Encerrar Oferta
+            </a>
         </div>
 
         <table>

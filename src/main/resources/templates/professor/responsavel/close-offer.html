@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Encerrar Oferta</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+            margin: 0;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 48px auto;
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 12px 32px rgba(15,23,42,.08);
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .card {
+            background: #fafafa;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 180px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #166534;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .error {
+            color: red;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Encerrar Oferta</h1>
+
+    <div class="card">
+
+        <p>
+            <strong>Oferta:</strong>
+            <span th:text="${offer.name}"></span>
+        </p>
+
+        <p>
+            <strong>Semestre:</strong>
+            <span th:text="${offer.semester}"></span>
+        </p>
+
+        <p>
+            <strong>Status:</strong>
+            <span th:text="${offer.status}"></span>
+        </p>
+
+    </div>
+
+    <form
+            th:action="@{/professor/responsavel/ofertas/{id}/encerrar(id=${offer.id})}"
+            th:object="${form}"
+            method="post">
+
+        <label for="lessonsLearned">
+            Lições Aprendidas
+        </label>
+
+        <textarea
+                id="lessonsLearned"
+                th:field="*{lessonsLearned}">
+        </textarea>
+
+        <div class="error"
+             th:if="${#fields.hasErrors('lessonsLearned')}"
+             th:errors="*{lessonsLearned}">
+        </div>
+
+        <div class="actions">
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Encerrar Oferta
+            </button>
+
+            <a class="btn btn-secondary"
+               th:href="@{/professor/responsavel/dashboard}">
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>
