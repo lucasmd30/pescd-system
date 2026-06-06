@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Detalhes da Oferta</title>
+    <title>Detalhes do Aluno</title>
 
     <style>
         body {
@@ -13,7 +13,7 @@
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 1000px;
             margin: 48px auto;
             background: white;
             border-radius: 16px;
@@ -50,11 +50,11 @@
             background: #1976d2;
             color: white;
             text-align: left;
-            padding: 14px;
+            padding: 12px;
         }
 
         td {
-            padding: 14px;
+            padding: 12px;
             border-bottom: 1px solid #e5e7eb;
         }
 
@@ -79,46 +79,39 @@
             text-decoration: none;
             padding: 10px 16px;
             border-radius: 8px;
-            transition: .2s;
         }
 
         .btn:hover {
             background: #1565c0;
         }
     </style>
+
 </head>
 <body>
 
 <div class="container">
 
-    <h1>Detalhes da Oferta</h1>
+    <h1>Detalhes do Aluno</h1>
 
     <div class="card">
 
-        <h2>Informações da Oferta</h2>
+        <h2>Informações do Aluno</h2>
 
         <p>
             <strong>Nome:</strong>
-            <span th:text="${offer.name}"></span>
+            <span th:text="${offerStudent.student.fullName}"></span>
         </p>
 
         <p>
-            <strong>Semestre:</strong>
-            <span th:text="${offer.semester}"></span>
+            <strong>Email:</strong>
+            <span th:text="${offerStudent.student.email}"></span>
         </p>
 
         <p>
-            <strong>Status:</strong>
+            <strong>Status Atual:</strong>
+
             <span class="status"
-                  th:text="${offer.status.displayName}">
-            </span>
-        </p>
-
-        <p>
-            <strong>Professor Responsável:</strong>
-            <span th:text="${offer.responsibleProfessor != null ?
-                            offer.responsibleProfessor.fullName :
-                            'Não definido'}">
+                  th:text="${offerStudent.status.displayName}">
             </span>
         </p>
 
@@ -126,40 +119,36 @@
 
     <div class="card">
 
-        <h2>Alunos Inscritos</h2>
+        <h2>Histórico de Status</h2>
 
-        <p th:if="${#lists.isEmpty(students)}">Nenhum aluno inscrito nesta oferta.</p>
-
-        <table th:if="${!#lists.isEmpty(students)}">
+        <table>
 
             <thead>
             <tr>
-                <th>Aluno</th>
-                <th>Status</th>
-                <th>Ações</th>
+                <th>Status Anterior</th>
+                <th>Novo Status</th>
+                <th>Descrição</th>
+                <th>Data</th>
             </tr>
             </thead>
 
             <tbody>
 
-            <tr th:each="offerStudent : ${students}">
-
-                <td th:text="${offerStudent.student.fullName}"></td>
-
-                <td>
-        <span class="status"
-              th:text="${offerStudent.status.displayName}">
-        </span>
+            <tr th:if="${#lists.isEmpty(logs)}">
+                <td colspan="4">
+                    Nenhuma alteração de status registrada.
                 </td>
+            </tr>
 
-                <td>
-                    <a class="btn"
-                       th:href="@{/secretary/offers/{offerId}/students/{offerStudentId}
-           (offerId=${offer.id},
-            offerStudentId=${offerStudent.id})}">
-                        Ver Detalhes
-                    </a>
-                </td>
+            <tr th:each="log : ${logs}">
+
+                <td th:text="${log.previousStatus}"></td>
+
+                <td th:text="${log.newStatus}"></td>
+
+                <td th:text="${log.description}"></td>
+
+                <td th:text="${#temporals.format(log.changedAt,'dd/MM/yyyy HH:mm')}"></td>
 
             </tr>
 
@@ -169,11 +158,8 @@
 
     </div>
 
-    <a class="btn" th:href="@{/secretary/offers/{id}/students(id=${offer.id})}">
-        Gerenciar alunos
-    </a>
-
-    <a class="btn" th:href="@{/secretary/offers}">
+    <a class="btn"
+       th:href="@{/secretary/offers/{id}(id=${offerStudent.offer.id})}">
         Voltar
     </a>
 

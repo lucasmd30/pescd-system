@@ -38,6 +38,8 @@ public class Offer {
 
     private LocalDateTime createdAt;
 
+    private LocalDateTime closedAt;
+
     @ManyToOne
     @JoinColumn(name = "created_by_id")
     private User createdBy;

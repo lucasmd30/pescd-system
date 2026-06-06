@@ -45,3 +45,4 @@ public class OfferStudentStatusLog {
         this.changedAt = LocalDateTime.now();
     }
 }
+

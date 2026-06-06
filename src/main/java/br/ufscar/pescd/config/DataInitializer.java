@@ -167,7 +167,7 @@ public class DataInitializer implements CommandLineRunner {
         offer.setSemester(semester);
         offer.setStartDate(startDate);
         offer.setEndDate(endDate);
-        offer.setStatus(OfferStatus.EM_ANDAMENTO);
+        offer.setStatus(OfferStatus.AGUARDANDO_ENCERRAMENTO_SECRETARIO);
         offer.setResponsibleProfessor(responsibleProfessor);
         offer.setCreatedBy(createdBy);
         return offerRepository.save(offer);

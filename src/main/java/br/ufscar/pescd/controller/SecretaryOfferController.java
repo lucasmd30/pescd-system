@@ -87,6 +87,7 @@ public class SecretaryOfferController {
         return "secretary/offers/students";
     }
 
+
     @PostMapping("/{id}/students")
     public String addStudent(
             @PathVariable Long id,
@@ -127,10 +128,45 @@ public class SecretaryOfferController {
         return "redirect:/secretary/offers/" + id + "/students";
     }
 
+    @GetMapping("/{offerId}/students/{offerStudentId}")
+    public String studentDetails(
+            @PathVariable Long offerId,
+            @PathVariable Long offerStudentId,
+            Model model
+    ) {
+
+        OfferStudent offerStudent =
+                secretaryOfferService.getOfferStudent(offerStudentId);
+
+        model.addAttribute("offerStudent", offerStudent);
+
+        model.addAttribute(
+                "logs",
+                secretaryOfferService.getStudentLogs(offerStudentId)
+        );
+
+        return "secretary/offers/student-details";
+    }
 
     @PostMapping("/{id}/close")
-    public String closeOffer(@PathVariable Long id) {
-        secretaryOfferService.closeOffer(id);
+    public String closeOffer(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes
+    ) {
+
+        try {
+            secretaryOfferService.closeOffer(id);
+            redirectAttributes.addFlashAttribute(
+                    "successMessage",
+                    "Oferta encerrada com sucesso."
+            );
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    ex.getMessage()
+            );
+        }
+
         return "redirect:/secretary/offers";
     }
 }

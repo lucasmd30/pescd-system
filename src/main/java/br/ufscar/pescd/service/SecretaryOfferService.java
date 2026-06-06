@@ -1,5 +1,7 @@
 package br.ufscar.pescd.service;
 
+import br.ufscar.pescd.entity.OfferStudentStatusLog;
+import br.ufscar.pescd.repository.OfferStudentStatusLogRepository;
 import br.ufscar.pescd.dto.OfferForm;
 import br.ufscar.pescd.dto.StudentForm;
 import br.ufscar.pescd.entity.Offer;
@@ -15,11 +17,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import br.ufscar.pescd.entity.StatusChangeLog;
+import br.ufscar.pescd.repository.StatusChangeLogRepository;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -29,17 +34,20 @@ public class SecretaryOfferService {
     private final OfferStudentRepository offerStudentRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final StatusChangeLogRepository statusChangeLogRepository;
 
     public SecretaryOfferService(
             OfferRepository offerRepository,
             OfferStudentRepository offerStudentRepository,
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            StatusChangeLogRepository statusChangeLogRepository
     ) {
         this.offerRepository = offerRepository;
         this.offerStudentRepository = offerStudentRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.statusChangeLogRepository = statusChangeLogRepository;
     }
 
     @Transactional(readOnly = true)
@@ -57,6 +65,15 @@ public class SecretaryOfferService {
     public List<OfferStudent> getOfferStudents(Long offerId) {
         Offer offer = getOffer(offerId);
         return offerStudentRepository.findByOffer(offer);
+    }
+
+    @Transactional(readOnly = true)
+    public List<StatusChangeLog> getStudentLogs(Long offerStudentId) {
+
+        OfferStudent offerStudent = getOfferStudent(offerStudentId);
+
+        return statusChangeLogRepository
+                .findByOfferStudentOrderByChangedAtAsc(offerStudent);
     }
 
     @Transactional(readOnly = true)
@@ -179,9 +196,28 @@ public class SecretaryOfferService {
 
     @Transactional
     public void closeOffer(Long id) {
+
         Offer offer = getOffer(id);
+
+        if (offer.getStatus() != OfferStatus.AGUARDANDO_ENCERRAMENTO_SECRETARIO) {
+            throw new IllegalArgumentException(
+                    "A oferta ainda não está aguardando encerramento do secretário."
+            );
+        }
+
         offer.setStatus(OfferStatus.CONCLUIDA);
+        offer.setClosedAt(LocalDateTime.now());
+
         offerRepository.save(offer);
+    }
+
+
+
+    @Transactional(readOnly = true)
+    public OfferStudent getOfferStudent(Long id) {
+        return offerStudentRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Aluno da oferta não encontrado."));
     }
 
     private boolean enroll(Offer offer, User student) {
