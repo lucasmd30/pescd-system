@@ -106,6 +106,9 @@ public class DataInitializer implements CommandLineRunner {
             offerStudentRepository.save(aluno2Offer1);
             seedWorkPlan(aluno2Offer1);
         }
+
+        // --- Seed PS.01 / PS.02: aluno com PLANO_ENVIADO sob supervisão de professorLevada ---
+        enrollWithSupervisor(aluno3, offer1, professorLevada, StudentOfferStatus.PLANO_ENVIADO);
     }
 
     private User upsertUser(
@@ -173,6 +176,22 @@ public class DataInitializer implements CommandLineRunner {
         workPlan.setFileContent(
                 "%PDF-1.4\n% Plano de trabalho de exemplo (PESCD)\n".getBytes(StandardCharsets.UTF_8));
         workPlanRepository.save(workPlan);
+    }
+
+    private OfferStudent enrollWithSupervisor(
+            User student,
+            Offer offer,
+            User supervisor,
+            StudentOfferStatus status
+    ) {
+        OfferStudent os = offerStudentRepository
+                .findByOfferAndStudent(offer, student)
+                .orElseGet(OfferStudent::new);
+        os.setStudent(student);
+        os.setOffer(offer);
+        os.setSupervisor(supervisor);
+        os.setStatus(status);
+        return offerStudentRepository.save(os);
     }
 
     private void removeLegacyMockOffers() {

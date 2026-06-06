@@ -106,8 +106,15 @@
     </div>
 
     <div class="card" sec:authorize="hasRole('PROFESSOR')">
-        O perfil Professor cobre os casos de Professor Supervisor e Professor Responsável.
-        Assim, um mesmo docente pode acumular responsabilidades sem precisar de dois logins diferentes.
+        <p style="margin:0 0 16px;">
+            O perfil Professor cobre os casos de Professor Supervisor e Professor Responsável.
+            Um mesmo docente pode acumular as duas responsabilidades.
+        </p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a th:href="@{/professor/supervisor/dashboard}" class="primary">
+                Minhas Supervisões
+            </a>
+        </div>
     </div>
 </div>
 </body>

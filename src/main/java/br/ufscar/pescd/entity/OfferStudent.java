@@ -27,7 +27,7 @@ public class OfferStudent {
     private User student;
 
     @ManyToOne
-    @JoinColumn(name = "supervisor_id")
+    @JoinColumn(name = "supervisor_professor_id")
     private User supervisor;
 
     @Enumerated(EnumType.STRING)
