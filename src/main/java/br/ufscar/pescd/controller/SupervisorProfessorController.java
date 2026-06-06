@@ -1,10 +1,10 @@
 package br.ufscar.pescd.controller;
 
 import br.ufscar.pescd.dto.ApprovePlanFormDTO;
+import br.ufscar.pescd.dto.ApproveReportFormDTO;
 import br.ufscar.pescd.dto.SupervisorDashboardDTO;
-import br.ufscar.pescd.entity.OfferStudent;
-import br.ufscar.pescd.entity.User;
-import br.ufscar.pescd.entity.WorkPlan;
+import br.ufscar.pescd.entity.*;
+import br.ufscar.pescd.enums.GradeOption;
 import br.ufscar.pescd.repository.UserRepository;
 import br.ufscar.pescd.service.SupervisorProfessorService;
 import jakarta.validation.Valid;
@@ -130,6 +130,94 @@ public class SupervisorProfessorController {
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "inline; filename=\"" + plan.getFileName() + "\"")
                 .body(plan.getFileContent());
+    }
+
+    // -------------------------------------------------------------------------
+    // PS.03 — Aprovar Relatório
+    // -------------------------------------------------------------------------
+
+    @GetMapping("/ofertas/{offerId}/alunos/{studentId}/aprovar-relatorio")
+    public String approveReportForm(
+            @PathVariable Long offerId,
+            @PathVariable Long studentId,
+            Model model,
+            Authentication authentication
+    ) {
+        User professor = resolveUser(authentication);
+
+        OfferStudent os = supervisorProfessorService
+                .getEnrollmentForSupervisor(offerId, studentId, professor);
+
+        WorkPlan plan = supervisorProfessorService.getWorkPlan(os);
+        Report report  = supervisorProfessorService.getReport(os);
+
+        ApproveReportFormDTO form = new ApproveReportFormDTO();
+        form.setFrequencia(report.getFrequency());   // pré-preenchido com valor do aluno
+
+        model.addAttribute("offerStudent", os);
+        model.addAttribute("workPlan", plan);
+        model.addAttribute("report", report);
+        model.addAttribute("statusLogs", supervisorProfessorService.getStatusLogs(os));
+        model.addAttribute("gradeOptions", GradeOption.values());
+        model.addAttribute("form", form);
+
+        return "professor/supervisor/approve-report";
+    }
+
+    @PostMapping("/ofertas/{offerId}/alunos/{studentId}/aprovar-relatorio")
+    public String approveReport(
+            @PathVariable Long offerId,
+            @PathVariable Long studentId,
+            @Valid @ModelAttribute("form") ApproveReportFormDTO form,
+            BindingResult bindingResult,
+            Model model,
+            Authentication authentication,
+            RedirectAttributes redirectAttributes
+    ) {
+        User professor = resolveUser(authentication);
+
+        if (bindingResult.hasErrors()) {
+            OfferStudent os = supervisorProfessorService
+                    .getEnrollmentForSupervisor(offerId, studentId, professor);
+            model.addAttribute("offerStudent", os);
+            model.addAttribute("workPlan", supervisorProfessorService.getWorkPlan(os));
+            model.addAttribute("report", supervisorProfessorService.getReport(os));
+            model.addAttribute("statusLogs", supervisorProfessorService.getStatusLogs(os));
+            model.addAttribute("gradeOptions", GradeOption.values());
+            return "professor/supervisor/approve-report";
+        }
+
+        supervisorProfessorService.approveReport(offerId, studentId, professor, form);
+
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Relatório aprovado com sucesso.");
+
+        return "redirect:/professor/supervisor/dashboard";
+    }
+
+    // -------------------------------------------------------------------------
+    // Download do PDF do relatório (PS.03)
+    // -------------------------------------------------------------------------
+
+    @GetMapping("/ofertas/{offerId}/alunos/{studentId}/relatorio/download")
+    @ResponseBody
+    public ResponseEntity<byte[]> downloadReport(
+            @PathVariable Long offerId,
+            @PathVariable Long studentId,
+            Authentication authentication
+    ) {
+        User professor = resolveUser(authentication);
+
+        OfferStudent os = supervisorProfessorService
+                .getEnrollmentForSupervisor(offerId, studentId, professor);
+
+        Report report = supervisorProfessorService.getReport(os);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(report.getContentType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + report.getFileName() + "\"")
+                .body(report.getFileContent());
     }
 
     // -------------------------------------------------------------------------

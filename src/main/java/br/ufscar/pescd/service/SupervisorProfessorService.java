@@ -1,5 +1,6 @@
 package br.ufscar.pescd.service;
 
+import br.ufscar.pescd.dto.ApproveReportFormDTO;
 import br.ufscar.pescd.dto.SupervisorDashboardDTO;
 import br.ufscar.pescd.entity.*;
 import br.ufscar.pescd.enums.StudentOfferStatus;
@@ -18,15 +19,18 @@ public class SupervisorProfessorService {
 
     private final OfferStudentRepository offerStudentRepository;
     private final WorkPlanRepository workPlanRepository;
+    private final ReportRepository reportRepository;
     private final StatusChangeLogRepository statusChangeLogRepository;
 
     public SupervisorProfessorService(
             OfferStudentRepository offerStudentRepository,
             WorkPlanRepository workPlanRepository,
+            ReportRepository reportRepository,
             StatusChangeLogRepository statusChangeLogRepository
     ) {
         this.offerStudentRepository = offerStudentRepository;
         this.workPlanRepository = workPlanRepository;
+        this.reportRepository = reportRepository;
         this.statusChangeLogRepository = statusChangeLogRepository;
     }
 
@@ -94,6 +98,43 @@ public class SupervisorProfessorService {
         workPlanRepository.save(plan);
 
         changeStatus(os, StudentOfferStatus.PLANO_APROVADO, "Plano de trabalho aprovado pelo professor supervisor");
+    }
+
+    // -------------------------------------------------------------------------
+    // PS.03 — Aprovar Relatório
+    // -------------------------------------------------------------------------
+
+    @Transactional(readOnly = true)
+    public Report getReport(OfferStudent offerStudent) {
+        return reportRepository.findByOfferStudent(offerStudent)
+                .orElseThrow(() -> new IllegalArgumentException("Relatório não encontrado."));
+    }
+
+    @Transactional(readOnly = true)
+    public List<StatusChangeLog> getStatusLogs(OfferStudent offerStudent) {
+        return statusChangeLogRepository.findByOfferStudentOrderByChangedAtAsc(offerStudent);
+    }
+
+    @Transactional
+    public void approveReport(Long offerId, Long studentId, User professor, ApproveReportFormDTO form) {
+
+        OfferStudent os = getEnrollmentForSupervisor(offerId, studentId, professor);
+
+        if (os.getStatus() != StudentOfferStatus.RELATORIO_ENVIADO) {
+            throw new IllegalArgumentException(
+                    "Ação indisponível: o status atual é \""
+                    + os.getStatus().getDisplayName() + "\".");
+        }
+
+        Report report = getReport(os);
+        report.setSupervisorParecer(form.getParecer());
+        report.setSupervisorFrequencia(form.getFrequencia());
+        report.setSupervisorNotaSugestao(form.getNotaSugestao());
+        report.setSupervisorApprovedAt(LocalDateTime.now());
+        reportRepository.save(report);
+
+        changeStatus(os, StudentOfferStatus.RELATORIO_APROVADO_SUPERVISOR,
+                "Relatório aprovado pelo professor supervisor");
     }
 
     // -------------------------------------------------------------------------

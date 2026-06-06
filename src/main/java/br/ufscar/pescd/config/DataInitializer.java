@@ -3,6 +3,7 @@ package br.ufscar.pescd.config;
 import br.ufscar.pescd.entity.Offer;
 import br.ufscar.pescd.entity.OfferStudent;
 import br.ufscar.pescd.entity.User;
+import br.ufscar.pescd.entity.Report;
 import br.ufscar.pescd.entity.WorkPlan;
 import br.ufscar.pescd.enums.OfferStatus;
 import br.ufscar.pescd.enums.StudentOfferStatus;
@@ -10,6 +11,7 @@ import br.ufscar.pescd.enums.UserRole;
 import br.ufscar.pescd.repository.OfferRepository;
 import br.ufscar.pescd.repository.OfferStudentRepository;
 import br.ufscar.pescd.repository.UserRepository;
+import br.ufscar.pescd.repository.ReportRepository;
 import br.ufscar.pescd.repository.WorkPlanRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,6 +28,7 @@ public class DataInitializer implements CommandLineRunner {
     private final OfferRepository offerRepository;
     private final OfferStudentRepository offerStudentRepository;
     private final WorkPlanRepository workPlanRepository;
+    private final ReportRepository reportRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DataInitializer(
@@ -33,12 +36,14 @@ public class DataInitializer implements CommandLineRunner {
             OfferRepository offerRepository,
             OfferStudentRepository offerStudentRepository,
             WorkPlanRepository workPlanRepository,
+            ReportRepository reportRepository,
             PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
         this.offerRepository = offerRepository;
         this.offerStudentRepository = offerStudentRepository;
         this.workPlanRepository = workPlanRepository;
+        this.reportRepository = reportRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -104,6 +109,12 @@ public class DataInitializer implements CommandLineRunner {
         OfferStudent seedPS02 = enrollWithSupervisor(
                 aluno3, offer1, professorLevada, StudentOfferStatus.PLANO_ENVIADO);
         seedWorkPlan(seedPS02);
+
+        // --- Seed PS.03: Beatriz Costa em offer4 com RELATORIO_ENVIADO sob supervisão de Prof. Endo ---
+        OfferStudent seedPS03 = enrollWithSupervisor(
+                aluno4, offer4, professorEndo, StudentOfferStatus.RELATORIO_ENVIADO);
+        seedWorkPlan(seedPS03);
+        seedReport(seedPS03);
     }
 
     private User upsertUser(
@@ -171,6 +182,21 @@ public class DataInitializer implements CommandLineRunner {
         workPlan.setFileContent(
                 "%PDF-1.4\n% Plano de trabalho de exemplo (PESCD)\n".getBytes(StandardCharsets.UTF_8));
         workPlanRepository.save(workPlan);
+    }
+
+    private void seedReport(OfferStudent offerStudent) {
+        if (reportRepository.findByOfferStudent(offerStudent).isPresent()) {
+            return;
+        }
+
+        Report report = new Report();
+        report.setOfferStudent(offerStudent);
+        report.setFrequency(85);
+        report.setFileName("relatorio-exemplo.pdf");
+        report.setContentType("application/pdf");
+        report.setFileContent(
+                "%PDF-1.4\n% Relatório de exemplo (PESCD)\n".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        reportRepository.save(report);
     }
 
     private OfferStudent enrollWithSupervisor(

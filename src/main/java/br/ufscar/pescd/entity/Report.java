@@ -1,5 +1,6 @@
 package br.ufscar.pescd.entity;
 
+import br.ufscar.pescd.enums.GradeOption;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,6 +39,24 @@ public class Report {
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime submittedAt;
+
+    // -------------------------------------------------------------------------
+    // PS.03 — campos preenchidos pelo Professor Supervisor
+    // -------------------------------------------------------------------------
+
+    /** Parecer do supervisor sobre o relatório (PS.03). */
+    @Column(columnDefinition = "TEXT")
+    private String supervisorParecer;
+
+    /** Frequência confirmada/ajustada pelo supervisor (PS.03). */
+    private Integer supervisorFrequencia;
+
+    /** Sugestão de nota do supervisor (PS.03). */
+    @Enumerated(EnumType.STRING)
+    private GradeOption supervisorNotaSugestao;
+
+    /** Timestamp da aprovação pelo supervisor (PS.03). */
+    private LocalDateTime supervisorApprovedAt;
 
     @PrePersist
     protected void onCreate() {
