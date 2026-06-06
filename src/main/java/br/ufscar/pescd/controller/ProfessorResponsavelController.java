@@ -41,6 +41,35 @@ public class ProfessorResponsavelController {
     // Dashboard
     // -------------------------------------------------------------------------
 
+    @GetMapping("/ofertas/{offerId}")
+    public String offerDetails(
+            @PathVariable Long offerId,
+            Authentication authentication,
+            Model model
+    ) {
+
+        User professor = resolveUser(authentication);
+
+        Offer offer = professorResponsavelService.getOffer(offerId);
+
+        if (!offer.getResponsibleProfessor().getId().equals(professor.getId())) {
+            throw new IllegalArgumentException(
+                    "Você não é responsável por esta oferta."
+            );
+        }
+
+        model.addAttribute("offer", offer);
+
+        model.addAttribute(
+                "students",
+                professorResponsavelService.getOfferStudents(offerId)
+        );
+
+        return "professor/responsavel/offer-details";
+    }
+
+
+
     @GetMapping("/dashboard")
     public String dashboard(Model model, Authentication authentication) {
 
@@ -87,6 +116,8 @@ public class ProfessorResponsavelController {
 
         return "professor/responsavel/conclude-report";
     }
+
+
 
     @PostMapping("/ofertas/{offerId}/alunos/{studentId}/concluir-relatorio")
     public String concludeReport(

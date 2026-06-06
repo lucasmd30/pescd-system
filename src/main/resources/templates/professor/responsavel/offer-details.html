@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes da Oferta</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+            margin: 0;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 48px auto;
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, .08);
+        }
+
+        .card {
+            margin-bottom: 24px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            background: #fafafa;
+        }
+
+        h1 {
+            margin-bottom: 24px;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        p {
+            margin: 10px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #166534;
+            color: white;
+            text-align: left;
+            padding: 14px;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .btn {
+            display: inline-block;
+            background: #166534;
+            color: white;
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+        }
+
+        .btn:hover {
+            background: #14532d;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Detalhes da Oferta</h1>
+
+    <div class="card">
+
+        <h2>Informações da Oferta</h2>
+
+        <p>
+            <strong>Nome:</strong>
+            <span th:text="${offer.name}"></span>
+        </p>
+
+        <p>
+            <strong>Semestre:</strong>
+            <span th:text="${offer.semester}"></span>
+        </p>
+
+        <p>
+            <strong>Status:</strong>
+            <span class="status"
+                  th:text="${offer.status.displayName}">
+            </span>
+        </p>
+
+        <p>
+            <strong>Professor Responsável:</strong>
+            <span th:text="${offer.responsibleProfessor.fullName}">
+            </span>
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Alunos Inscritos</h2>
+
+        <p th:if="${#lists.isEmpty(students)}">
+            Nenhum aluno inscrito nesta oferta.
+        </p>
+
+        <table th:if="${!#lists.isEmpty(students)}">
+
+            <thead>
+            <tr>
+                <th>Aluno</th>
+                <th>E-mail</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="offerStudent : ${students}">
+
+                <td th:text="${offerStudent.student.fullName}"></td>
+
+                <td th:text="${offerStudent.student.email}"></td>
+
+                <td>
+                    <span class="status"
+                          th:text="${offerStudent.status.displayName}">
+                    </span>
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <a class="btn"
+       th:href="@{/professor/responsavel/dashboard}">
+        Voltar
+    </a>
+
+</div>
+
+</body>
+</html>

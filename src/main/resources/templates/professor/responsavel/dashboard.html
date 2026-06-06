@@ -166,11 +166,18 @@
             <span class="offer-meta" th:text="${item.offer.semester} + ' · ' + ${item.offer.status}"></span>
         </div>
 
-        <div style="padding:15px;">
+        <div style="padding:15px; display:flex; gap:10px;">
+
+            <a th:href="@{/professor/responsavel/ofertas/{id}(id=${item.offer.id})}"
+               class="btn btn-secondary">
+                Ver Oferta
+            </a>
+
             <a th:href="@{/professor/responsavel/ofertas/{id}/encerrar(id=${item.offer.id})}"
                class="btn btn-primary">
                 Encerrar Oferta
             </a>
+
         </div>
 
         <table>

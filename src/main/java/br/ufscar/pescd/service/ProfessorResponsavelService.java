@@ -179,6 +179,15 @@ public class ProfessorResponsavelService {
         offerRepository.save(offer);
     }
 
+
+    @Transactional(readOnly = true)
+    public List<OfferStudent> getOfferStudents(Long offerId) {
+
+        Offer offer = getOffer(offerId);
+
+        return offerStudentRepository.findByOffer(offer);
+    }
+
     @Transactional
     public void analyzeDocumentation(Long offerId, Long studentId, User professor,
                                      AnalyzeDocumentationFormDTO form) {
