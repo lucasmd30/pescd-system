@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Supervisor — Minhas Supervisões</title>
+    <title th:text="#{supDashboard.title}">Supervisor — Minhas Supervisões</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -135,22 +135,22 @@
 
     <div class="topbar">
         <div>
-            <h1>Minhas Supervisões</h1>
+            <h1 th:text="#{supDashboard.heading}">Minhas Supervisões</h1>
             <p class="subtitle"
-               th:text="'Prof. ' + ${professor.fullName}"></p>
+               th:text="#{supDashboard.profPrefix} + ' ' + ${professor.fullName}"></p>
         </div>
         <div style="display:flex; gap:10px;">
-            <a th:href="@{/dashboard}" class="btn btn-secondary">← Painel</a>
+            <a th:href="@{/dashboard}" class="btn btn-secondary" th:text="'← ' + #{supDashboard.panel}">← Painel</a>
             <form th:action="@{/logout}" method="post" style="margin:0;">
-                <button type="submit" class="btn btn-secondary">Logout</button>
+                <button type="submit" class="btn btn-secondary" th:text="#{common.logout}">Logout</button>
             </form>
         </div>
     </div>
 
     <!-- Estado vazio -->
     <div class="empty-state" th:if="${#lists.isEmpty(dashboard)}">
-        <strong>Nenhuma supervisão encontrada.</strong>
-        <p>Você ainda não está atribuído como supervisor de nenhum aluno.</p>
+        <strong th:text="#{supDashboard.emptyTitle}">Nenhuma supervisão encontrada.</strong>
+        <p th:text="#{supDashboard.emptyText}">Você ainda não está atribuído como supervisor de nenhum aluno.</p>
     </div>
 
     <!-- Bloco por oferta -->
@@ -159,21 +159,21 @@
         <div class="offer-header">
             <span class="offer-name" th:text="${item.offer.name}"></span>
             <span class="offer-meta"
-                  th:text="${item.offer.semester}
-                           + ' · Resp.: '
-                           + ${item.offer.responsibleProfessor != null
+                  th:text="${item.offer.semester
+                           + ' · ' + #messages.msg('supDashboard.respPrefix') + ' '
+                           + (item.offer.responsibleProfessor != null
                               ? item.offer.responsibleProfessor.fullName
-                              : 'Não definido'}">
+                              : #messages.msg('common.notDefined'))}">
             </span>
         </div>
 
         <table>
             <thead>
             <tr>
-                <th>Aluno</th>
-                <th>E-mail</th>
-                <th>Status</th>
-                <th>Ações</th>
+                <th th:text="#{supDashboard.col.student}">Aluno</th>
+                <th th:text="#{supDashboard.col.email}">E-mail</th>
+                <th th:text="#{supDashboard.col.status}">Status</th>
+                <th th:text="#{supDashboard.col.actions}">Ações</th>
             </tr>
             </thead>
             <tbody>
@@ -185,7 +185,7 @@
                 <td>
                     <span class="status"
                           th:classappend="'status-' + ${#strings.toLowerCase(os.status.name())}"
-                          th:text="${os.status.name().replace('_',' ')}">
+                          th:text="${#messages.msg('studentStatus.' + os.status.name())}">
                     </span>
                 </td>
 
@@ -193,14 +193,14 @@
                     <!-- PS.02: Aprovar Plano -->
                     <a th:if="${os.status.name() == 'PLANO_ENVIADO'}"
                        th:href="@{/professor/supervisor/ofertas/{oId}/alunos/{sId}/aprovar-plano(oId=${item.offer.id}, sId=${os.student.id})}"
-                       class="btn btn-primary">
+                       class="btn btn-primary" th:text="#{supDashboard.approvePlan}">
                         Aprovar Plano
                     </a>
 
                     <!-- PS.03: Aprovar Relatório -->
                     <a th:if="${os.status.name() == 'RELATORIO_ENVIADO'}"
                        th:href="@{/professor/supervisor/ofertas/{oId}/alunos/{sId}/aprovar-relatorio(oId=${item.offer.id}, sId=${os.student.id})}"
-                       class="btn btn-primary">
+                       class="btn btn-primary" th:text="#{supDashboard.approveReport}">
                         Aprovar Relatório
                     </a>
 

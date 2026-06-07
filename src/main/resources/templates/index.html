@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ofertas do Programa - PESCD</title>
+    <title th:text="#{index.title}">Ofertas do Programa - PESCD</title>
     <style>
         :root {
             --bg: #f3f4f6;
@@ -172,30 +172,30 @@
 <div class="page">
     <section class="hero">
         <div class="hero-copy">
-            <span class="eyebrow">Consulta pública de ofertas</span>
-            <h1>Ofertas do programa abertas à visualização do visitante</h1>
+            <span class="eyebrow" th:text="#{index.eyebrow}">Consulta pública de ofertas</span>
+            <h1 th:text="#{index.heading}">Ofertas do programa abertas à visualização do visitante</h1>
         </div>
 
         <div class="hero-actions">
-            <a th:href="@{/login}" class="button">Login</a>
+            <a th:href="@{/login}" class="button" th:text="#{common.login}">Login</a>
         </div>
     </section>
 
     <section class="panel">
         <div class="panel-header">
-            <h2>Lista de ofertas</h2>
-            <span>Ordenação por semestre decrescente</span>
+            <h2 th:text="#{index.listTitle}">Lista de ofertas</h2>
+            <span th:text="#{index.listSubtitle}">Ordenação por semestre decrescente</span>
         </div>
 
         <table th:if="${!#lists.isEmpty(offers)}">
             <thead>
             <tr>
-                <th>Nome da oferta</th>
-                <th>Semestre</th>
-                <th>Data de início</th>
-                <th>Data de fim</th>
-                <th>Professor responsável</th>
-                <th>Número de alunos matriculados</th>
+                <th th:text="#{index.col.name}">Nome da oferta</th>
+                <th th:text="#{index.col.semester}">Semestre</th>
+                <th th:text="#{index.col.startDate}">Data de início</th>
+                <th th:text="#{index.col.endDate}">Data de fim</th>
+                <th th:text="#{index.col.responsible}">Professor responsável</th>
+                <th th:text="#{index.col.enrolled}">Número de alunos matriculados</th>
             </tr>
             </thead>
             <tbody>
@@ -210,7 +210,7 @@
             </tbody>
         </table>
 
-        <div th:if="${#lists.isEmpty(offers)}" class="empty">
+        <div th:if="${#lists.isEmpty(offers)}" class="empty" th:text="#{index.empty}">
             Nenhuma oferta cadastrada no momento.
         </div>
     </section>

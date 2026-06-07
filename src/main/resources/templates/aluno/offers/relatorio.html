@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Enviar Relatório Final - PESCD</title>
+    <title th:text="#{studentReport.title}">Enviar Relatório Final - PESCD</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f5f7fa; margin: 0; color: #1f2937; }
         .container { max-width: 820px; margin: 48px auto; background: #fff; border-radius: 16px;
@@ -34,63 +34,63 @@
 </head>
 <body>
 <div class="container">
-    <h1>Enviar relatório final</h1>
-    <p class="subtitle">Oferta: <strong th:text="${enrollment.offer.name}"></strong></p>
+    <h1 th:text="#{studentReport.heading}">Enviar relatório final</h1>
+    <p class="subtitle"><span th:text="#{studentReport.offer}">Oferta:</span> <strong th:text="${enrollment.offer.name}"></strong></p>
 
     <div th:if="${errorMessage}" class="flash-error" th:text="${errorMessage}"></div>
 
     <div class="card">
-        <h2>Dados da oferta</h2>
-        <p><strong>Semestre:</strong> <span th:text="${enrollment.offer.semester}"></span></p>
-        <p><strong>Professor responsável:</strong>
+        <h2 th:text="#{studentReport.offerData}">Dados da oferta</h2>
+        <p><strong th:text="#{studentReport.label.semester}">Semestre:</strong> <span th:text="${enrollment.offer.semester}"></span></p>
+        <p><strong th:text="#{studentReport.label.responsible}">Professor responsável:</strong>
             <span th:text="${enrollment.offer.responsibleProfessor != null
-                         ? enrollment.offer.responsibleProfessor.fullName : 'Não definido'}"></span></p>
-        <p><strong>Meu status:</strong>
-            <span class="status" th:text="${enrollment.status.displayName}"></span></p>
+                         ? enrollment.offer.responsibleProfessor.fullName : #messages.msg('common.notDefined')}"></span></p>
+        <p><strong th:text="#{studentReport.label.myStatus}">Meu status:</strong>
+            <span class="status" th:text="${#messages.msg('studentStatus.' + enrollment.status.name())}"></span></p>
     </div>
 
     <div class="card" th:if="${workPlan != null}">
-        <h2>Plano de trabalho enviado</h2>
-        <p><strong>Disciplina:</strong>
+        <h2 th:text="#{studentReport.planSent}">Plano de trabalho enviado</h2>
+        <p><strong th:text="#{studentReport.label.discipline}">Disciplina:</strong>
             <span th:text="${workPlan.disciplineCode + ' - ' + workPlan.disciplineName}"></span></p>
-        <p><strong>Curso:</strong> <span th:text="${workPlan.disciplineCourse}"></span></p>
-        <p><strong>Professor supervisor:</strong>
+        <p><strong th:text="#{studentReport.label.course}">Curso:</strong> <span th:text="${workPlan.disciplineCourse}"></span></p>
+        <p><strong th:text="#{studentReport.label.supervisor}">Professor supervisor:</strong>
             <span th:text="${enrollment.supervisor != null ? enrollment.supervisor.fullName : '-'}"></span></p>
         <p><a class="secondary" th:href="@{/aluno/ofertas/{id}/plano/arquivo(id=${enrollment.id})}"
-              target="_blank">Abrir PDF do plano</a></p>
+              target="_blank" th:text="#{studentReport.openPlanPdf}">Abrir PDF do plano</a></p>
     </div>
 
     <div class="card">
-        <h2>Histórico de status</h2>
+        <h2 th:text="#{studentReport.statusHistory}">Histórico de status</h2>
         <ul class="timeline" th:if="${!#lists.isEmpty(logs)}">
             <li th:each="log : ${logs}">
                 <span th:text="${log.description}"></span>
-                <span class="status" th:text="${log.newStatus.displayName}"></span>
+                <span class="status" th:text="${#messages.msg('studentStatus.' + log.newStatus.name())}"></span>
                 <span class="muted" th:text="${#temporals.format(log.changedAt, 'dd/MM/yyyy HH:mm')}"></span>
             </li>
         </ul>
-        <p class="muted" th:if="${#lists.isEmpty(logs)}">Nenhuma mudança de status registrada.</p>
+        <p class="muted" th:if="${#lists.isEmpty(logs)}" th:text="#{common.noStatusChanges}">Nenhuma mudança de status registrada.</p>
     </div>
 
     <div class="card">
-        <h2>Relatório</h2>
+        <h2 th:text="#{studentReport.section}">Relatório</h2>
         <form th:action="@{/aluno/ofertas/{id}/relatorio(id=${enrollment.id})}"
               th:object="${reportForm}" method="post" enctype="multipart/form-data">
 
             <div class="field">
-                <label for="frequency">Indicador de frequência (0 a 100%) *</label>
+                <label for="frequency" th:text="#{studentReport.frequency}">Indicador de frequência (0 a 100%) *</label>
                 <input type="number" id="frequency" min="0" max="100" th:field="*{frequency}">
                 <div class="error" th:if="${#fields.hasErrors('frequency')}" th:errors="*{frequency}"></div>
             </div>
 
             <div class="field">
-                <label for="file">Arquivo do relatório (PDF, máx. 5 MB) *</label>
+                <label for="file" th:text="#{studentReport.file}">Arquivo do relatório (PDF, máx. 5 MB) *</label>
                 <input type="file" id="file" name="file" accept="application/pdf" required>
             </div>
 
             <div class="actions">
-                <button type="submit" class="primary">Enviar relatório</button>
-                <a th:href="@{/aluno/ofertas/{id}(id=${enrollment.id})}" class="secondary">Cancelar</a>
+                <button type="submit" class="primary" th:text="#{studentReport.submit}">Enviar relatório</button>
+                <a th:href="@{/aluno/ofertas/{id}(id=${enrollment.id})}" class="secondary" th:text="#{common.cancel}">Cancelar</a>
             </div>
         </form>
     </div>

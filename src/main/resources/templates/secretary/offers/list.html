@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Acompanhamento de Ofertas</title>
+    <title th:text="#{offerList.title}">Acompanhamento de Ofertas</title>
 
     <style>
         body {
@@ -110,8 +110,8 @@
 <div class="container">
 
     <div class="header">
-        <h1>Acompanhamento de Ofertas</h1>
-        <a class="btn" th:href="@{/secretary/offers/new}">Nova oferta</a>
+        <h1 th:text="#{offerList.heading}">Acompanhamento de Ofertas</h1>
+        <a class="btn" th:href="@{/secretary/offers/new}" th:text="#{offerList.new}">Nova oferta</a>
     </div>
 
     <div th:if="${successMessage}" class="flash-success" th:text="${successMessage}"></div>
@@ -120,11 +120,11 @@
     <table th:if="${!#lists.isEmpty(offers)}">
         <thead>
         <tr>
-            <th>Oferta</th>
-            <th>Semestre</th>
-            <th>Status</th>
-            <th>Professor Responsável</th>
-            <th>Ações</th>
+            <th th:text="#{offerList.col.offer}">Oferta</th>
+            <th th:text="#{offerList.col.semester}">Semestre</th>
+            <th th:text="#{offerList.col.status}">Status</th>
+            <th th:text="#{offerList.col.responsible}">Professor Responsável</th>
+            <th th:text="#{common.actions}">Ações</th>
         </tr>
         </thead>
 
@@ -136,26 +136,26 @@
             <td th:text="${offer.semester}"></td>
 
             <td>
-                <span class="status" th:text="${offer.status.displayName}"></span>
+                <span class="status" th:text="${#messages.msg('offerStatus.' + offer.status.name())}"></span>
             </td>
 
             <td th:text="${offer.responsibleProfessor != null ?
                          offer.responsibleProfessor.fullName :
-                         'Não definido'}">
+                         #messages.msg('common.notDefined')}">
             </td>
 
             <td>
                 <div class="actions">
-                    <a class="btn" th:href="@{/secretary/offers/{id}(id=${offer.id})}">Ver Detalhes</a>
+                    <a class="btn" th:href="@{/secretary/offers/{id}(id=${offer.id})}" th:text="#{offerList.viewDetails}">Ver Detalhes</a>
 
                     <a class="btn secondary"
-                       th:href="@{/secretary/offers/{id}/students(id=${offer.id})}">Gerenciar alunos</a>
+                       th:href="@{/secretary/offers/{id}/students(id=${offer.id})}" th:text="#{offerList.manageStudents}">Gerenciar alunos</a>
 
                     <form th:if="${offer.status.name() == 'AGUARDANDO_ENCERRAMENTO_SECRETARIO'}"
                           th:action="@{/secretary/offers/{id}/close(id=${offer.id})}"
                           method="post" style="display:inline;"
-                          onsubmit="return confirm('Confirma o encerramento da oferta? Os créditos serão atribuídos aos alunos e a oferta será concluída.');">
-                        <button type="submit" class="btn">Encerrar</button>
+                          th:onsubmit="'return confirm(\'' + #{offerList.closeConfirm} + '\');'">
+                        <button type="submit" class="btn" th:text="#{offerList.close}">Encerrar</button>
                     </form>
                 </div>
             </td>
@@ -165,7 +165,7 @@
 
     </table>
 
-    <p th:if="${#lists.isEmpty(offers)}">Nenhuma oferta cadastrada. Crie a primeira oferta.</p>
+    <p th:if="${#lists.isEmpty(offers)}" th:text="#{offerList.empty}">Nenhuma oferta cadastrada. Crie a primeira oferta.</p>
 
 </div>
 

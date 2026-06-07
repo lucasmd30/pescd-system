@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Detalhes do Aluno</title>
+    <title th:text="#{studentDetails.title}">Detalhes do Aluno</title>
 
     <style>
         body {
@@ -91,27 +91,27 @@
 
 <div class="container">
 
-    <h1>Detalhes do Aluno</h1>
+    <h1 th:text="#{studentDetails.heading}">Detalhes do Aluno</h1>
 
     <div class="card">
 
-        <h2>Informações do Aluno</h2>
+        <h2 th:text="#{studentDetails.info}">Informações do Aluno</h2>
 
         <p>
-            <strong>Nome:</strong>
+            <strong th:text="#{studentDetails.label.name}">Nome:</strong>
             <span th:text="${offerStudent.student.fullName}"></span>
         </p>
 
         <p>
-            <strong>Email:</strong>
+            <strong th:text="#{studentDetails.label.email}">Email:</strong>
             <span th:text="${offerStudent.student.email}"></span>
         </p>
 
         <p>
-            <strong>Status Atual:</strong>
+            <strong th:text="#{studentDetails.label.currentStatus}">Status Atual:</strong>
 
             <span class="status"
-                  th:text="${offerStudent.status.displayName}">
+                  th:text="${#messages.msg('studentStatus.' + offerStudent.status.name())}">
             </span>
         </p>
 
@@ -119,32 +119,32 @@
 
     <div class="card">
 
-        <h2>Histórico de Status</h2>
+        <h2 th:text="#{studentDetails.statusHistory}">Histórico de Status</h2>
 
         <table>
 
             <thead>
             <tr>
-                <th>Status Anterior</th>
-                <th>Novo Status</th>
-                <th>Descrição</th>
-                <th>Data</th>
+                <th th:text="#{studentDetails.col.previousStatus}">Status Anterior</th>
+                <th th:text="#{studentDetails.col.newStatus}">Novo Status</th>
+                <th th:text="#{studentDetails.col.description}">Descrição</th>
+                <th th:text="#{studentDetails.col.date}">Data</th>
             </tr>
             </thead>
 
             <tbody>
 
             <tr th:if="${#lists.isEmpty(logs)}">
-                <td colspan="4">
+                <td colspan="4" th:text="#{studentDetails.empty}">
                     Nenhuma alteração de status registrada.
                 </td>
             </tr>
 
             <tr th:each="log : ${logs}">
 
-                <td th:text="${log.previousStatus}"></td>
+                <td th:text="${log.previousStatus != null ? #messages.msg('studentStatus.' + log.previousStatus.name()) : '-'}"></td>
 
-                <td th:text="${log.newStatus}"></td>
+                <td th:text="${log.newStatus != null ? #messages.msg('studentStatus.' + log.newStatus.name()) : '-'}"></td>
 
                 <td th:text="${log.description}"></td>
 
@@ -159,7 +159,8 @@
     </div>
 
     <a class="btn"
-       th:href="@{/secretary/offers/{id}(id=${offerStudent.offer.id})}">
+       th:href="@{/secretary/offers/{id}(id=${offerStudent.offer.id})}"
+       th:text="#{common.back}">
         Voltar
     </a>
 

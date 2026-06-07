@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Alunos da Oferta - PESCD</title>
+    <title th:text="#{manageStudents.title}">Alunos da Oferta - PESCD</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -138,9 +138,9 @@
 </head>
 <body>
 <div class="container">
-    <h1>Gestão de alunos</h1>
+    <h1 th:text="#{manageStudents.heading}">Gestão de alunos</h1>
     <p class="subtitle">
-        Oferta: <strong th:text="${offer.name}"></strong>
+        <span th:text="#{manageStudents.offer}">Oferta:</span> <strong th:text="${offer.name}"></strong>
         — <span th:text="${offer.semester}"></span>
     </p>
 
@@ -148,40 +148,40 @@
     <div th:if="${errorMessage}" class="flash-error" th:text="${errorMessage}"></div>
 
     <div class="card">
-        <h2>Adicionar aluno</h2>
-        <p class="subtitle">Se o e-mail já existir no sistema, o aluno é apenas vinculado a esta oferta.</p>
+        <h2 th:text="#{manageStudents.addStudent}">Adicionar aluno</h2>
+        <p class="subtitle" th:text="#{manageStudents.addHint}">Se o e-mail já existir no sistema, o aluno é apenas vinculado a esta oferta.</p>
 
         <form th:action="@{/secretary/offers/{id}/students(id=${offer.id})}"
               th:object="${studentForm}" method="post">
             <div class="grid">
                 <div>
-                    <label for="fullName">Nome completo *</label>
+                    <label for="fullName" th:text="#{manageStudents.fullName}">Nome completo *</label>
                     <input type="text" id="fullName" th:field="*{fullName}">
                     <div class="error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
                 </div>
                 <div>
-                    <label for="email">E-mail *</label>
+                    <label for="email" th:text="#{manageStudents.email}">E-mail *</label>
                     <input type="email" id="email" th:field="*{email}">
                     <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                 </div>
                 <div>
-                    <label for="username">Nome de usuário *</label>
+                    <label for="username" th:text="#{manageStudents.username}">Nome de usuário *</label>
                     <input type="text" id="username" th:field="*{username}">
                     <div class="error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
                 </div>
                 <div>
-                    <label for="password">Senha *</label>
+                    <label for="password" th:text="#{manageStudents.password}">Senha *</label>
                     <input type="password" id="password" th:field="*{password}">
                     <div class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
                 </div>
             </div>
-            <button type="submit" class="primary" style="margin-top: 12px;">Adicionar aluno</button>
+            <button type="submit" class="primary" style="margin-top: 12px;" th:text="#{manageStudents.addButton}">Adicionar aluno</button>
         </form>
     </div>
 
     <div class="card">
-        <h2>Importar via CSV</h2>
-        <p class="subtitle">
+        <h2 th:text="#{manageStudents.importCsv}">Importar via CSV</h2>
+        <p class="subtitle" th:utext="#{manageStudents.importHint('&lt;code&gt;RA,NOME_COMPLETO,EMAIL&lt;/code&gt;')}">
             Cabeçalho esperado: <code>RA,NOME_COMPLETO,EMAIL</code>.
             Alunos já cadastrados são vinculados; novos são criados usando o e-mail como nome de
             usuário e o RA como senha.
@@ -189,32 +189,32 @@
         <form th:action="@{/secretary/offers/{id}/students/import(id=${offer.id})}"
               method="post" enctype="multipart/form-data">
             <input type="file" name="file" accept=".csv" required style="margin-bottom: 12px;">
-            <button type="submit" class="primary">Importar CSV</button>
+            <button type="submit" class="primary" th:text="#{manageStudents.importButton}">Importar CSV</button>
         </form>
     </div>
 
     <div class="card">
-        <h2>Alunos inscritos</h2>
+        <h2 th:text="#{manageStudents.enrolled}">Alunos inscritos</h2>
         <table th:if="${!#lists.isEmpty(students)}">
             <thead>
             <tr>
-                <th>Aluno</th>
-                <th>E-mail</th>
-                <th>Status</th>
+                <th th:text="#{manageStudents.col.student}">Aluno</th>
+                <th th:text="#{manageStudents.col.email}">E-mail</th>
+                <th th:text="#{manageStudents.col.status}">Status</th>
             </tr>
             </thead>
             <tbody>
             <tr th:each="offerStudent : ${students}">
                 <td th:text="${offerStudent.student.fullName}"></td>
                 <td th:text="${offerStudent.student.email}"></td>
-                <td><span class="status" th:text="${offerStudent.status.displayName}"></span></td>
+                <td><span class="status" th:text="${#messages.msg('studentStatus.' + offerStudent.status.name())}"></span></td>
             </tr>
             </tbody>
         </table>
-        <p th:if="${#lists.isEmpty(students)}">Nenhum aluno inscrito nesta oferta ainda.</p>
+        <p th:if="${#lists.isEmpty(students)}" th:text="#{manageStudents.empty}">Nenhum aluno inscrito nesta oferta ainda.</p>
     </div>
 
-    <a th:href="@{/secretary/offers}" class="secondary">Voltar para ofertas</a>
+    <a th:href="@{/secretary/offers}" class="secondary" th:text="#{manageStudents.back}">Voltar para ofertas</a>
 </div>
 </body>
 </html>

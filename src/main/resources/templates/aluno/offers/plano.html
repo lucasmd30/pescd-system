@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Enviar Plano de Trabalho - PESCD</title>
+    <title th:text="#{studentPlan.title}">Enviar Plano de Trabalho - PESCD</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f5f7fa; margin: 0; color: #1f2937; }
         .container { max-width: 720px; margin: 48px auto; background: #fff; border-radius: 16px;
@@ -25,8 +25,8 @@
 </head>
 <body>
 <div class="container">
-    <h1>Enviar plano de trabalho</h1>
-    <p class="subtitle">Oferta: <strong th:text="${enrollment.offer.name}"></strong></p>
+    <h1 th:text="#{studentPlan.heading}">Enviar plano de trabalho</h1>
+    <p class="subtitle"><span th:text="#{studentPlan.offer}">Oferta:</span> <strong th:text="${enrollment.offer.name}"></strong></p>
 
     <div th:if="${errorMessage}" class="flash-error" th:text="${errorMessage}"></div>
 
@@ -34,27 +34,27 @@
           th:object="${workPlanForm}" method="post" enctype="multipart/form-data">
 
         <div class="field">
-            <label for="disciplineCode">Código da disciplina *</label>
+            <label for="disciplineCode" th:text="#{studentPlan.disciplineCode}">Código da disciplina *</label>
             <input type="text" id="disciplineCode" th:field="*{disciplineCode}">
             <div class="error" th:if="${#fields.hasErrors('disciplineCode')}" th:errors="*{disciplineCode}"></div>
         </div>
 
         <div class="field">
-            <label for="disciplineName">Nome da disciplina *</label>
+            <label for="disciplineName" th:text="#{studentPlan.disciplineName}">Nome da disciplina *</label>
             <input type="text" id="disciplineName" th:field="*{disciplineName}">
             <div class="error" th:if="${#fields.hasErrors('disciplineName')}" th:errors="*{disciplineName}"></div>
         </div>
 
         <div class="field">
-            <label for="disciplineCourse">Curso da disciplina *</label>
+            <label for="disciplineCourse" th:text="#{studentPlan.disciplineCourse}">Curso da disciplina *</label>
             <input type="text" id="disciplineCourse" th:field="*{disciplineCourse}">
             <div class="error" th:if="${#fields.hasErrors('disciplineCourse')}" th:errors="*{disciplineCourse}"></div>
         </div>
 
         <div class="field">
-            <label for="supervisorId">Professor supervisor *</label>
+            <label for="supervisorId" th:text="#{studentPlan.supervisor}">Professor supervisor *</label>
             <select id="supervisorId" th:field="*{supervisorId}">
-                <option value="">Selecione...</option>
+                <option value="" th:text="#{common.select}">Selecione...</option>
                 <option th:each="professor : ${professors}"
                         th:value="${professor.id}" th:text="${professor.fullName}"></option>
             </select>
@@ -62,13 +62,13 @@
         </div>
 
         <div class="field">
-            <label for="file">Arquivo do plano (PDF, máx. 5 MB) *</label>
+            <label for="file" th:text="#{studentPlan.file}">Arquivo do plano (PDF, máx. 5 MB) *</label>
             <input type="file" id="file" name="file" accept="application/pdf" required>
         </div>
 
         <div class="actions">
-            <button type="submit" class="primary">Enviar plano</button>
-            <a th:href="@{/aluno/ofertas/{id}(id=${enrollment.id})}" class="secondary">Cancelar</a>
+            <button type="submit" class="primary" th:text="#{studentPlan.submit}">Enviar plano</button>
+            <a th:href="@{/aluno/ofertas/{id}(id=${enrollment.id})}" class="secondary" th:text="#{common.cancel}">Cancelar</a>
         </div>
     </form>
 </div>

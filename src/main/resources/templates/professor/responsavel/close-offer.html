@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Encerrar Oferta</title>
+    <title th:text="#{closeOffer.title}">Encerrar Oferta</title>
 
     <style>
         body {
@@ -84,23 +84,23 @@
 
 <div class="container">
 
-    <h1>Encerrar Oferta</h1>
+    <h1 th:text="#{closeOffer.heading}">Encerrar Oferta</h1>
 
     <div class="card">
 
         <p>
-            <strong>Oferta:</strong>
+            <strong th:text="#{closeOffer.label.offer}">Oferta:</strong>
             <span th:text="${offer.name}"></span>
         </p>
 
         <p>
-            <strong>Semestre:</strong>
+            <strong th:text="#{closeOffer.label.semester}">Semestre:</strong>
             <span th:text="${offer.semester}"></span>
         </p>
 
         <p>
-            <strong>Status:</strong>
-            <span th:text="${offer.status}"></span>
+            <strong th:text="#{closeOffer.label.status}">Status:</strong>
+            <span th:text="${#messages.msg('offerStatus.' + offer.status.name())}"></span>
         </p>
 
     </div>
@@ -110,7 +110,7 @@
             th:object="${form}"
             method="post">
 
-        <label for="lessonsLearned">
+        <label for="lessonsLearned" th:text="#{closeOffer.lessonsLearned}">
             Lições Aprendidas
         </label>
 
@@ -127,12 +127,13 @@
         <div class="actions">
 
             <button type="submit"
-                    class="btn btn-primary">
+                    class="btn btn-primary" th:text="#{closeOffer.submit}">
                 Encerrar Oferta
             </button>
 
             <a class="btn btn-secondary"
-               th:href="@{/professor/responsavel/dashboard}">
+               th:href="@{/professor/responsavel/dashboard}"
+               th:text="#{common.cancel}">
                 Cancelar
             </a>
 

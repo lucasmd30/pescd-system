@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Minhas Ofertas - PESCD</title>
+    <title th:text="#{studentOffers.title}">Minhas Ofertas - PESCD</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -96,11 +96,11 @@
 <div class="container">
     <div class="header">
         <div>
-            <h1>Minhas ofertas</h1>
-            <p>Acompanhe o status do seu estágio em cada oferta.</p>
+            <h1 th:text="#{studentOffers.heading}">Minhas ofertas</h1>
+            <p th:text="#{studentOffers.subtitle}">Acompanhe o status do seu estágio em cada oferta.</p>
         </div>
         <form th:action="@{/logout}" method="post">
-            <button type="submit" class="secondary">Logout</button>
+            <button type="submit" class="secondary" th:text="#{common.logout}">Logout</button>
         </form>
     </div>
 
@@ -109,14 +109,14 @@
     <table th:if="${!#lists.isEmpty(enrollments)}">
         <thead>
         <tr>
-            <th>Oferta</th>
-            <th>Semestre</th>
-            <th>Início</th>
-            <th>Fim</th>
-            <th>Professor responsável</th>
-            <th>Status da oferta</th>
-            <th>Meu status</th>
-            <th>Ações</th>
+            <th th:text="#{studentOffers.col.offer}">Oferta</th>
+            <th th:text="#{studentOffers.col.semester}">Semestre</th>
+            <th th:text="#{studentOffers.col.start}">Início</th>
+            <th th:text="#{studentOffers.col.end}">Fim</th>
+            <th th:text="#{studentOffers.col.responsible}">Professor responsável</th>
+            <th th:text="#{studentOffers.col.offerStatus}">Status da oferta</th>
+            <th th:text="#{studentOffers.col.myStatus}">Meu status</th>
+            <th th:text="#{common.actions}">Ações</th>
         </tr>
         </thead>
         <tbody>
@@ -126,17 +126,17 @@
             <td th:text="${#temporals.format(enrollment.offer.startDate, 'dd/MM/yyyy')}"></td>
             <td th:text="${#temporals.format(enrollment.offer.endDate, 'dd/MM/yyyy')}"></td>
             <td th:text="${enrollment.offer.responsibleProfessor != null
-                         ? enrollment.offer.responsibleProfessor.fullName : 'Não definido'}"></td>
-            <td><span class="status" th:text="${enrollment.offer.status.displayName}"></span></td>
-            <td><span class="status" th:text="${enrollment.status.displayName}"></span></td>
+                         ? enrollment.offer.responsibleProfessor.fullName : #messages.msg('common.notDefined')}"></td>
+            <td><span class="status" th:text="${#messages.msg('offerStatus.' + enrollment.offer.status.name())}"></span></td>
+            <td><span class="status" th:text="${#messages.msg('studentStatus.' + enrollment.status.name())}"></span></td>
             <td>
-                <a class="primary" th:href="@{/aluno/ofertas/{id}(id=${enrollment.id})}">Ver detalhes</a>
+                <a class="primary" th:href="@{/aluno/ofertas/{id}(id=${enrollment.id})}" th:text="#{common.viewDetails}">Ver detalhes</a>
             </td>
         </tr>
         </tbody>
     </table>
 
-    <p th:if="${#lists.isEmpty(enrollments)}" class="empty">
+    <p th:if="${#lists.isEmpty(enrollments)}" class="empty" th:text="#{studentOffers.empty}">
         Você ainda não está inscrito em nenhuma oferta.
     </p>
 </div>

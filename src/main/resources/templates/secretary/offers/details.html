@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Detalhes da Oferta</title>
+    <title th:text="#{offerDetails.title}">Detalhes da Oferta</title>
 
     <style>
         body {
@@ -91,34 +91,34 @@
 
 <div class="container">
 
-    <h1>Detalhes da Oferta</h1>
+    <h1 th:text="#{offerDetails.heading}">Detalhes da Oferta</h1>
 
     <div class="card">
 
-        <h2>Informações da Oferta</h2>
+        <h2 th:text="#{offerDetails.info}">Informações da Oferta</h2>
 
         <p>
-            <strong>Nome:</strong>
+            <strong th:text="#{offerDetails.label.name}">Nome:</strong>
             <span th:text="${offer.name}"></span>
         </p>
 
         <p>
-            <strong>Semestre:</strong>
+            <strong th:text="#{offerDetails.label.semester}">Semestre:</strong>
             <span th:text="${offer.semester}"></span>
         </p>
 
         <p>
-            <strong>Status:</strong>
+            <strong th:text="#{offerDetails.label.status}">Status:</strong>
             <span class="status"
-                  th:text="${offer.status.displayName}">
+                  th:text="${#messages.msg('offerStatus.' + offer.status.name())}">
             </span>
         </p>
 
         <p>
-            <strong>Professor Responsável:</strong>
+            <strong th:text="#{offerDetails.label.responsible}">Professor Responsável:</strong>
             <span th:text="${offer.responsibleProfessor != null ?
                             offer.responsibleProfessor.fullName :
-                            'Não definido'}">
+                            #messages.msg('common.notDefined')}">
             </span>
         </p>
 
@@ -126,17 +126,17 @@
 
     <div class="card">
 
-        <h2>Alunos Inscritos</h2>
+        <h2 th:text="#{offerDetails.enrolledStudents}">Alunos Inscritos</h2>
 
-        <p th:if="${#lists.isEmpty(students)}">Nenhum aluno inscrito nesta oferta.</p>
+        <p th:if="${#lists.isEmpty(students)}" th:text="#{offerDetails.empty}">Nenhum aluno inscrito nesta oferta.</p>
 
         <table th:if="${!#lists.isEmpty(students)}">
 
             <thead>
             <tr>
-                <th>Aluno</th>
-                <th>Status</th>
-                <th>Ações</th>
+                <th th:text="#{offerDetails.col.student}">Aluno</th>
+                <th th:text="#{offerDetails.col.status}">Status</th>
+                <th th:text="#{common.actions}">Ações</th>
             </tr>
             </thead>
 
@@ -148,7 +148,7 @@
 
                 <td>
         <span class="status"
-              th:text="${offerStudent.status.displayName}">
+              th:text="${#messages.msg('studentStatus.' + offerStudent.status.name())}">
         </span>
                 </td>
 
@@ -156,7 +156,8 @@
                     <a class="btn"
                        th:href="@{/secretary/offers/{offerId}/students/{offerStudentId}
            (offerId=${offer.id},
-            offerStudentId=${offerStudent.id})}">
+            offerStudentId=${offerStudent.id})}"
+                       th:text="#{offerDetails.viewDetails}">
                         Ver Detalhes
                     </a>
                 </td>
@@ -169,11 +170,11 @@
 
     </div>
 
-    <a class="btn" th:href="@{/secretary/offers/{id}/students(id=${offer.id})}">
+    <a class="btn" th:href="@{/secretary/offers/{id}/students(id=${offer.id})}" th:text="#{offerDetails.manageStudents}">
         Gerenciar alunos
     </a>
 
-    <a class="btn" th:href="@{/secretary/offers}">
+    <a class="btn" th:href="@{/secretary/offers}" th:text="#{common.back}">
         Voltar
     </a>
 

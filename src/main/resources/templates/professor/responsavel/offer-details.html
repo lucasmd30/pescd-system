@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Detalhes da Oferta</title>
+    <title th:text="#{respOfferDetails.title}">Detalhes da Oferta</title>
 
     <style>
         body {
@@ -90,31 +90,31 @@
 
 <div class="container">
 
-    <h1>Detalhes da Oferta</h1>
+    <h1 th:text="#{respOfferDetails.heading}">Detalhes da Oferta</h1>
 
     <div class="card">
 
-        <h2>Informações da Oferta</h2>
+        <h2 th:text="#{respOfferDetails.info}">Informações da Oferta</h2>
 
         <p>
-            <strong>Nome:</strong>
+            <strong th:text="#{respOfferDetails.label.name}">Nome:</strong>
             <span th:text="${offer.name}"></span>
         </p>
 
         <p>
-            <strong>Semestre:</strong>
+            <strong th:text="#{respOfferDetails.label.semester}">Semestre:</strong>
             <span th:text="${offer.semester}"></span>
         </p>
 
         <p>
-            <strong>Status:</strong>
+            <strong th:text="#{respOfferDetails.label.status}">Status:</strong>
             <span class="status"
-                  th:text="${offer.status.displayName}">
+                  th:text="${#messages.msg('offerStatus.' + offer.status.name())}">
             </span>
         </p>
 
         <p>
-            <strong>Professor Responsável:</strong>
+            <strong th:text="#{respOfferDetails.label.responsible}">Professor Responsável:</strong>
             <span th:text="${offer.responsibleProfessor.fullName}">
             </span>
         </p>
@@ -123,21 +123,22 @@
 
     <div class="card">
 
-        <h2>Alunos Inscritos</h2>
+        <h2 th:text="#{respOfferDetails.enrolledStudents}">Alunos Inscritos</h2>
 
         <form method="get" style="margin-bottom:20px;">
             <input type="text"
                    name="nome"
+                   th:placeholder="#{respOfferDetails.searchPlaceholder}"
                    placeholder="Buscar aluno pelo nome"
                    th:value="${nome}"
                    style="padding:8px; width:300px;">
 
-            <button type="submit" class="btn">
+            <button type="submit" class="btn" th:text="#{respOfferDetails.search}">
                 Buscar
             </button>
         </form>
 
-        <p th:if="${#lists.isEmpty(students)}">
+        <p th:if="${#lists.isEmpty(students)}" th:text="#{respOfferDetails.empty}">
             Nenhum aluno encontrado.
         </p>
 
@@ -145,9 +146,9 @@
 
             <thead>
             <tr>
-                <th>Aluno</th>
-                <th>E-mail</th>
-                <th>Status</th>
+                <th th:text="#{respOfferDetails.col.student}">Aluno</th>
+                <th th:text="#{respOfferDetails.col.email}">E-mail</th>
+                <th th:text="#{respOfferDetails.col.status}">Status</th>
             </tr>
             </thead>
 
@@ -161,7 +162,7 @@
 
                 <td>
                     <span class="status"
-                          th:text="${offerStudent.status.displayName}">
+                          th:text="${#messages.msg('studentStatus.' + offerStudent.status.name())}">
                     </span>
                 </td>
 
@@ -174,7 +175,8 @@
     </div>
 
     <a class="btn"
-       th:href="@{/professor/responsavel/dashboard}">
+       th:href="@{/professor/responsavel/dashboard}"
+       th:text="#{common.back}">
         Voltar
     </a>
 

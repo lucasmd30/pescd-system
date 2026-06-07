@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Aprovar Relatório</title>
+    <title th:text="#{approveReport.title}">Aprovar Relatório</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -189,59 +189,58 @@
 
     <div th:if="${successMessage}" class="alert-success" th:text="${successMessage}"></div>
 
-    <h1>Aprovar Relatório Final</h1>
+    <h1 th:text="#{approveReport.heading}">Aprovar Relatório Final</h1>
     <p class="subtitle"
-       th:text="'Aluno: ' + ${offerStudent.student.fullName}
-                + ' · Oferta: ' + ${offerStudent.offer.name}">
+       th:text="#{approveReport.subtitle(${offerStudent.student.fullName}, ${offerStudent.offer.name})}">
     </p>
 
     <!-- Dados do Plano de Trabalho -->
-    <div class="section-title">Plano de Trabalho (enviado pelo aluno)</div>
+    <div class="section-title" th:text="#{approveReport.section.plan}">Plano de Trabalho (enviado pelo aluno)</div>
     <div class="info-grid">
         <div class="info-item">
-            <label>Código da Disciplina</label>
+            <label th:text="#{approveReport.label.disciplineCode}">Código da Disciplina</label>
             <span th:text="${workPlan.disciplineCode}"></span>
         </div>
         <div class="info-item">
-            <label>Nome da Disciplina</label>
+            <label th:text="#{approveReport.label.disciplineName}">Nome da Disciplina</label>
             <span th:text="${workPlan.disciplineName}"></span>
         </div>
         <div class="info-item" style="grid-column: span 2;">
-            <label>Curso</label>
+            <label th:text="#{approveReport.label.course}">Curso</label>
             <span th:text="${workPlan.disciplineCourse}"></span>
         </div>
     </div>
     <a class="pdf-link"
        th:href="@{/professor/supervisor/ofertas/{oId}/alunos/{sId}/plano/download(oId=${offerStudent.offer.id}, sId=${offerStudent.student.id})}"
-       target="_blank">
+       target="_blank" th:text="#{approveReport.viewPlanPdf}">
         📄 Visualizar PDF do Plano
     </a>
 
     <!-- Dados do Relatório -->
-    <div class="section-title">Relatório Final (enviado pelo aluno)</div>
+    <div class="section-title" th:text="#{approveReport.section.report}">Relatório Final (enviado pelo aluno)</div>
     <div class="info-grid">
         <div class="info-item">
-            <label>Frequência indicada pelo aluno</label>
+            <label th:text="#{approveReport.label.studentFrequency}">Frequência indicada pelo aluno</label>
             <span th:text="${report.frequency} + '%'"></span>
         </div>
         <div class="info-item">
-            <label>Enviado em</label>
+            <label th:text="#{approveReport.label.submittedAt}">Enviado em</label>
             <span th:text="${#temporals.format(report.submittedAt, 'dd/MM/yyyy HH:mm')}"></span>
         </div>
     </div>
     <a class="pdf-link"
        th:href="@{/professor/supervisor/ofertas/{oId}/alunos/{sId}/relatorio/download(oId=${offerStudent.offer.id}, sId=${offerStudent.student.id})}"
-       target="_blank">
+       target="_blank" th:text="#{approveReport.viewReportPdf}">
         📄 Visualizar PDF do Relatório
     </a>
 
     <!-- Histórico de status -->
-    <div class="section-title">Histórico de Status</div>
+    <div class="section-title" th:text="#{approveReport.statusHistory}">Histórico de Status</div>
     <ul class="log-list">
         <li th:each="log : ${statusLogs}">
             <span class="log-dot"></span>
             <div>
-                <strong th:text="${log.newStatus.displayName}"></strong>
+                <strong th:text="${#messages.msg('studentStatus.' + log.newStatus.name())}"></strong>
                 <span th:if="${log.description != null}"
                       th:text="' — ' + ${log.description}"></span>
                 <br>
@@ -250,22 +249,23 @@
                 </span>
             </div>
         </li>
-        <li th:if="${#lists.isEmpty(statusLogs)}" style="color:#9ca3af;">
+        <li th:if="${#lists.isEmpty(statusLogs)}" style="color:#9ca3af;" th:text="#{common.noHistory}">
             Nenhum histórico registrado.
         </li>
     </ul>
 
     <!-- Formulário de aprovação -->
-    <div class="section-title">Parecer do Supervisor</div>
+    <div class="section-title" th:text="#{approveReport.section.opinion}">Parecer do Supervisor</div>
 
     <form th:action="@{/professor/supervisor/ofertas/{oId}/alunos/{sId}/aprovar-relatorio(oId=${offerStudent.offer.id}, sId=${offerStudent.student.id})}"
           th:object="${form}"
           method="post">
 
         <div class="form-group">
-            <label for="parecer">Parecer *</label>
+            <label for="parecer" th:text="#{approveReport.parecer}">Parecer *</label>
             <textarea id="parecer"
                       th:field="*{parecer}"
+                      th:placeholder="#{approveReport.parecerPlaceholder}"
                       placeholder="Descreva seu parecer sobre o relatório final...">
             </textarea>
             <p class="error" th:if="${#fields.hasErrors('parecer')}" th:errors="*{parecer}"></p>
@@ -273,22 +273,23 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label for="frequencia">Frequência (%) *</label>
+                <label for="frequencia" th:text="#{approveReport.frequency}">Frequência (%) *</label>
                 <input type="number"
                        id="frequencia"
                        th:field="*{frequencia}"
                        min="0" max="100"
+                       th:placeholder="#{approveReport.frequencyPlaceholder}"
                        placeholder="0 a 100"/>
                 <p class="error" th:if="${#fields.hasErrors('frequencia')}" th:errors="*{frequencia}"></p>
             </div>
 
             <div class="form-group">
-                <label for="notaSugestao">Sugestão de Nota *</label>
+                <label for="notaSugestao" th:text="#{approveReport.gradeSuggestion}">Sugestão de Nota *</label>
                 <select id="notaSugestao" th:field="*{notaSugestao}">
-                    <option value="">— Selecione —</option>
+                    <option value="" th:text="#{approveReport.gradeSelect}">— Selecione —</option>
                     <option th:each="grade : ${gradeOptions}"
                             th:value="${grade.name()}"
-                            th:text="${grade.displayName}">
+                            th:text="${#messages.msg('grade.' + grade.name())}">
                     </option>
                 </select>
                 <p class="error" th:if="${#fields.hasErrors('notaSugestao')}" th:errors="*{notaSugestao}"></p>
@@ -296,8 +297,8 @@
         </div>
 
         <div class="actions">
-            <button type="submit" class="btn btn-primary">✓ Aprovar Relatório</button>
-            <a th:href="@{/professor/supervisor/dashboard}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary" th:text="#{approveReport.submit}">✓ Aprovar Relatório</button>
+            <a th:href="@{/professor/supervisor/dashboard}" class="btn btn-secondary" th:text="#{common.cancel}">Cancelar</a>
         </div>
 
     </form>

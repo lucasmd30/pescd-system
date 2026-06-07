@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Usuários - PESCD</title>
+    <title th:text="#{userList.title}">Usuários - PESCD</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -90,12 +90,12 @@
 <div class="container">
     <div class="header">
         <div>
-            <h1>Gerenciamento de usuários</h1>
-            <p>CRUD completo de usuários com controle de perfil e validações de acesso.</p>
+            <h1 th:text="#{userList.heading}">Gerenciamento de usuários</h1>
+            <p th:text="#{userList.subtitle}">CRUD completo de usuários com controle de perfil e validações de acesso.</p>
         </div>
         <div class="actions">
-            <a th:href="@{/admin/users/new}" class="primary">Novo usuário</a>
-            <a th:href="@{/dashboard}" class="secondary">Voltar</a>
+            <a th:href="@{/admin/users/new}" class="primary" th:text="#{userList.new}">Novo usuário</a>
+            <a th:href="@{/dashboard}" class="secondary" th:text="#{common.back}">Voltar</a>
         </div>
     </div>
 
@@ -105,11 +105,11 @@
     <table>
         <thead>
         <tr>
-            <th>Nome completo</th>
-            <th>E-mail</th>
-            <th>Usuário</th>
-            <th>Perfil</th>
-            <th>Ações</th>
+            <th th:text="#{userList.col.fullName}">Nome completo</th>
+            <th th:text="#{userList.col.email}">E-mail</th>
+            <th th:text="#{userList.col.username}">Usuário</th>
+            <th th:text="#{userList.col.role}">Perfil</th>
+            <th th:text="#{common.actions}">Ações</th>
         </tr>
         </thead>
         <tbody>
@@ -117,12 +117,13 @@
             <td th:text="${user.fullName}"></td>
             <td th:text="${user.email}"></td>
             <td th:text="${user.username}"></td>
-            <td th:text="${user.role.displayName}"></td>
+            <td th:text="${#messages.msg('role.' + user.role.name())}"></td>
             <td>
                 <div class="actions">
-                    <a th:href="@{/admin/users/{id}/edit(id=${user.id})}" class="secondary">Editar</a>
+                    <a th:href="@{/admin/users/{id}/edit(id=${user.id})}" class="secondary" th:text="#{common.edit}">Editar</a>
                     <form th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post">
-                        <button type="submit" class="danger" th:disabled="${user.username == loggedUsername}">
+                        <button type="submit" class="danger" th:disabled="${user.username == loggedUsername}"
+                                th:text="#{userList.remove}">
                             Remover
                         </button>
                     </form>

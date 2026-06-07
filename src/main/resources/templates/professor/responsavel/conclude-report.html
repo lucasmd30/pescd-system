@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Concluir Relatório</title>
+    <title th:text="#{concludeReport.title}">Concluir Relatório</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f5f7fa; margin: 0; color: #1f2937; }
 
@@ -167,62 +167,61 @@
 
     <div th:if="${successMessage}" class="alert-success" th:text="${successMessage}"></div>
 
-    <h1>Concluir Relatório Final</h1>
+    <h1 th:text="#{concludeReport.heading}">Concluir Relatório Final</h1>
     <p class="subtitle"
-       th:text="'Aluno: ' + ${offerStudent.student.fullName}
-                + ' · Oferta: ' + ${offerStudent.offer.name}">
+       th:text="#{concludeReport.subtitle(${offerStudent.student.fullName}, ${offerStudent.offer.name})}">
     </p>
 
     <!-- Plano de Trabalho -->
-    <div class="section-title">Plano de Trabalho</div>
+    <div class="section-title" th:text="#{concludeReport.section.plan}">Plano de Trabalho</div>
     <div class="info-grid">
         <div class="info-item">
-            <label>Código da Disciplina</label>
+            <label th:text="#{concludeReport.label.disciplineCode}">Código da Disciplina</label>
             <span th:text="${workPlan.disciplineCode}"></span>
         </div>
         <div class="info-item">
-            <label>Nome da Disciplina</label>
+            <label th:text="#{concludeReport.label.disciplineName}">Nome da Disciplina</label>
             <span th:text="${workPlan.disciplineName}"></span>
         </div>
         <div class="info-item" style="grid-column: span 2;">
-            <label>Curso</label>
+            <label th:text="#{concludeReport.label.course}">Curso</label>
             <span th:text="${workPlan.disciplineCourse}"></span>
         </div>
     </div>
     <a class="pdf-link"
        th:href="@{/professor/responsavel/ofertas/{oId}/alunos/{sId}/plano/download(oId=${offerStudent.offer.id}, sId=${offerStudent.student.id})}"
-       target="_blank">
+       target="_blank" th:text="#{concludeReport.viewPlanPdf}">
         📄 Visualizar PDF do Plano
     </a>
 
     <!-- Relatório + Avaliação do Supervisor -->
-    <div class="section-title">Relatório e Avaliação do Supervisor</div>
+    <div class="section-title" th:text="#{concludeReport.section.report}">Relatório e Avaliação do Supervisor</div>
     <div class="info-grid" style="margin-bottom: 12px;">
         <div class="info-item">
-            <label>Frequência indicada pelo aluno</label>
+            <label th:text="#{concludeReport.label.studentFrequency}">Frequência indicada pelo aluno</label>
             <span th:text="${report.frequency} + '%'"></span>
         </div>
         <div class="info-item">
-            <label>Enviado em</label>
+            <label th:text="#{concludeReport.label.submittedAt}">Enviado em</label>
             <span th:text="${#temporals.format(report.submittedAt, 'dd/MM/yyyy HH:mm')}"></span>
         </div>
     </div>
     <a class="pdf-link"
        th:href="@{/professor/responsavel/ofertas/{oId}/alunos/{sId}/relatorio/download(oId=${offerStudent.offer.id}, sId=${offerStudent.student.id})}"
-       target="_blank">
+       target="_blank" th:text="#{concludeReport.viewReportPdf}">
         📄 Visualizar PDF do Relatório
     </a>
 
     <div class="supervisor-box" style="margin-top: 14px;">
-        <div class="supervisor-label">Avaliação do Professor Supervisor</div>
+        <div class="supervisor-label" th:text="#{concludeReport.supervisorEval}">Avaliação do Professor Supervisor</div>
         <div class="supervisor-row">
-            <span><strong>Frequência:</strong>
+            <span><strong th:text="#{concludeReport.label.frequency}">Frequência:</strong>
                 <span th:text="${report.supervisorFrequencia} + '%'"></span>
             </span>
-            <span><strong>Sugestão de nota:</strong>
-                <span th:text="${report.supervisorNotaSugestao?.displayName}"></span>
+            <span><strong th:text="#{concludeReport.label.gradeSuggestion}">Sugestão de nota:</strong>
+                <span th:text="${report.supervisorNotaSugestao != null ? #messages.msg('grade.' + report.supervisorNotaSugestao.name()) : ''}"></span>
             </span>
-            <span><strong>Aprovado em:</strong>
+            <span><strong th:text="#{concludeReport.label.approvedAt}">Aprovado em:</strong>
                 <span th:text="${report.supervisorApprovedAt != null ?
                     #temporals.format(report.supervisorApprovedAt, 'dd/MM/yyyy HH:mm') : '—'}">
                 </span>
@@ -232,12 +231,12 @@
     </div>
 
     <!-- Histórico de status -->
-    <div class="section-title">Histórico de Status</div>
+    <div class="section-title" th:text="#{concludeReport.statusHistory}">Histórico de Status</div>
     <ul class="log-list">
         <li th:each="log : ${statusLogs}">
             <span class="log-dot"></span>
             <div>
-                <strong th:text="${log.newStatus.displayName}"></strong>
+                <strong th:text="${#messages.msg('studentStatus.' + log.newStatus.name())}"></strong>
                 <span th:if="${log.description != null}"
                       th:text="' — ' + ${log.description}"></span>
                 <br>
@@ -246,22 +245,23 @@
                 </span>
             </div>
         </li>
-        <li th:if="${#lists.isEmpty(statusLogs)}" style="color:#9ca3af;">
+        <li th:if="${#lists.isEmpty(statusLogs)}" style="color:#9ca3af;" th:text="#{common.noHistory}">
             Nenhum histórico registrado.
         </li>
     </ul>
 
     <!-- Formulário de conclusão -->
-    <div class="section-title">Parecer do Professor Responsável</div>
+    <div class="section-title" th:text="#{concludeReport.section.opinion}">Parecer do Professor Responsável</div>
 
     <form th:action="@{/professor/responsavel/ofertas/{oId}/alunos/{sId}/concluir-relatorio(oId=${offerStudent.offer.id}, sId=${offerStudent.student.id})}"
           th:object="${form}"
           method="post">
 
         <div class="form-group">
-            <label for="parecer">Parecer *</label>
+            <label for="parecer" th:text="#{concludeReport.parecer}">Parecer *</label>
             <textarea id="parecer"
                       th:field="*{parecer}"
+                      th:placeholder="#{concludeReport.parecerPlaceholder}"
                       placeholder="Descreva seu parecer final sobre o relatório...">
             </textarea>
             <p class="error" th:if="${#fields.hasErrors('parecer')}" th:errors="*{parecer}"></p>
@@ -269,7 +269,7 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label for="frequencia">Frequência (%) *</label>
+                <label for="frequencia" th:text="#{concludeReport.frequency}">Frequência (%) *</label>
                 <input type="number"
                        id="frequencia"
                        th:field="*{frequencia}"
@@ -278,12 +278,12 @@
             </div>
 
             <div class="form-group">
-                <label for="nota">Nota Final *</label>
+                <label for="nota" th:text="#{concludeReport.grade}">Nota Final *</label>
                 <select id="nota" th:field="*{nota}">
-                    <option value="">— Selecione —</option>
+                    <option value="" th:text="#{concludeReport.gradeSelect}">— Selecione —</option>
                     <option th:each="grade : ${gradeOptions}"
                             th:value="${grade.name()}"
-                            th:text="${grade.displayName}">
+                            th:text="${#messages.msg('grade.' + grade.name())}">
                     </option>
                 </select>
                 <p class="error" th:if="${#fields.hasErrors('nota')}" th:errors="*{nota}"></p>
@@ -291,8 +291,8 @@
         </div>
 
         <div class="actions">
-            <button type="submit" class="btn btn-primary">✓ Concluir Relatório</button>
-            <a th:href="@{/professor/responsavel/dashboard}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary" th:text="#{concludeReport.submit}">✓ Concluir Relatório</button>
+            <a th:href="@{/professor/responsavel/dashboard}" class="btn btn-secondary" th:text="#{common.cancel}">Cancelar</a>
         </div>
 
     </form>

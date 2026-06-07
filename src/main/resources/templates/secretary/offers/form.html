@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Nova Oferta - PESCD</title>
+    <title th:text="#{offerForm.title}">Nova Oferta - PESCD</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -91,39 +91,39 @@
 </head>
 <body>
 <div class="container">
-    <h1>Nova oferta</h1>
-    <p class="hint">Se o nome não for preenchido, ele será gerado automaticamente a partir do semestre.</p>
+    <h1 th:text="#{offerForm.heading}">Nova oferta</h1>
+    <p class="hint" th:text="#{offerForm.hint}">Se o nome não for preenchido, ele será gerado automaticamente a partir do semestre.</p>
 
     <form th:action="@{/secretary/offers}" th:object="${offerForm}" method="post">
 
         <div class="field">
-            <label for="name">Nome da oferta</label>
-            <input type="text" id="name" th:field="*{name}" placeholder="Opcional">
+            <label for="name" th:text="#{offerForm.name}">Nome da oferta</label>
+            <input type="text" id="name" th:field="*{name}" th:placeholder="#{offerForm.namePlaceholder}" placeholder="Opcional">
         </div>
 
         <div class="field">
-            <label for="semester">Semestre *</label>
-            <input type="text" id="semester" th:field="*{semester}" placeholder="Ex.: 2026/1">
+            <label for="semester" th:text="#{offerForm.semester}">Semestre *</label>
+            <input type="text" id="semester" th:field="*{semester}" th:placeholder="#{offerForm.semesterPlaceholder}" placeholder="Ex.: 2026/1">
             <div class="error" th:if="${#fields.hasErrors('semester')}" th:errors="*{semester}"></div>
         </div>
 
         <div class="row">
             <div class="field">
-                <label for="startDate">Data de início *</label>
+                <label for="startDate" th:text="#{offerForm.startDate}">Data de início *</label>
                 <input type="date" id="startDate" th:field="*{startDate}">
                 <div class="error" th:if="${#fields.hasErrors('startDate')}" th:errors="*{startDate}"></div>
             </div>
             <div class="field">
-                <label for="endDate">Data de fim *</label>
+                <label for="endDate" th:text="#{offerForm.endDate}">Data de fim *</label>
                 <input type="date" id="endDate" th:field="*{endDate}">
                 <div class="error" th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}"></div>
             </div>
         </div>
 
         <div class="field">
-            <label for="responsibleProfessorId">Professor responsável *</label>
+            <label for="responsibleProfessorId" th:text="#{offerForm.responsible}">Professor responsável *</label>
             <select id="responsibleProfessorId" th:field="*{responsibleProfessorId}">
-                <option value="">Selecione...</option>
+                <option value="" th:text="#{common.select}">Selecione...</option>
                 <option th:each="professor : ${professors}"
                         th:value="${professor.id}"
                         th:text="${professor.fullName}"></option>
@@ -133,8 +133,8 @@
         </div>
 
         <div class="actions">
-            <button type="submit" class="primary">Criar oferta</button>
-            <a th:href="@{/secretary/offers}" class="secondary">Cancelar</a>
+            <button type="submit" class="primary" th:text="#{offerForm.submit}">Criar oferta</button>
+            <a th:href="@{/secretary/offers}" class="secondary" th:text="#{common.cancel}">Cancelar</a>
         </div>
     </form>
 </div>

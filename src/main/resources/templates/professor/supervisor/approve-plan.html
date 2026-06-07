@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Aprovar Plano de Trabalho</title>
+    <title th:text="#{approvePlan.title}">Aprovar Plano de Trabalho</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -155,37 +155,36 @@
          th:text="${successMessage}">
     </div>
 
-    <h1>Aprovar Plano de Trabalho</h1>
+    <h1 th:text="#{approvePlan.heading}">Aprovar Plano de Trabalho</h1>
     <p class="subtitle"
-       th:text="'Aluno: ' + ${offerStudent.student.fullName}
-                + ' · Oferta: ' + ${offerStudent.offer.name}">
+       th:text="#{approvePlan.subtitle(${offerStudent.student.fullName}, ${offerStudent.offer.name})}">
     </p>
 
     <!-- Dados do plano (leitura) -->
-    <div class="section-title">Dados do Plano</div>
+    <div class="section-title" th:text="#{approvePlan.section.plan}">Dados do Plano</div>
 
     <div class="info-grid">
         <div class="info-item">
-            <label>Código da Disciplina</label>
+            <label th:text="#{approvePlan.label.disciplineCode}">Código da Disciplina</label>
             <span th:text="${workPlan.disciplineCode}"></span>
         </div>
         <div class="info-item">
-            <label>Nome da Disciplina</label>
+            <label th:text="#{approvePlan.label.disciplineName}">Nome da Disciplina</label>
             <span th:text="${workPlan.disciplineName}"></span>
         </div>
         <div class="info-item" style="grid-column: span 2;">
-            <label>Curso</label>
+            <label th:text="#{approvePlan.label.course}">Curso</label>
             <span th:text="${workPlan.disciplineCourse}"></span>
         </div>
         <div class="info-item">
-            <label>Enviado em</label>
+            <label th:text="#{approvePlan.label.submittedAt}">Enviado em</label>
             <span th:text="${#temporals.format(workPlan.submittedAt, 'dd/MM/yyyy HH:mm')}"></span>
         </div>
     </div>
 
     <a class="pdf-link"
        th:href="@{/professor/supervisor/ofertas/{oId}/alunos/{sId}/plano/download(oId=${offerStudent.offer.id}, sId=${offerStudent.student.id})}"
-       target="_blank">
+       target="_blank" th:text="#{approvePlan.viewPdf}">
         📄 Visualizar PDF do Plano
     </a>
 
@@ -195,9 +194,10 @@
           method="post">
 
         <div class="form-group">
-            <label for="parecer">Parecer do Supervisor *</label>
+            <label for="parecer" th:text="#{approvePlan.parecer}">Parecer do Supervisor *</label>
             <textarea id="parecer"
                       th:field="*{parecer}"
+                      th:placeholder="#{approvePlan.parecerPlaceholder}"
                       placeholder="Descreva seu parecer sobre o plano de trabalho...">
             </textarea>
             <p class="error"
@@ -207,8 +207,8 @@
         </div>
 
         <div class="actions">
-            <button type="submit" class="btn btn-primary">✓ Aprovar Plano</button>
-            <a th:href="@{/professor/supervisor/dashboard}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary" th:text="#{approvePlan.submit}">✓ Aprovar Plano</button>
+            <a th:href="@{/professor/supervisor/dashboard}" class="btn btn-secondary" th:text="#{common.cancel}">Cancelar</a>
         </div>
 
     </form>

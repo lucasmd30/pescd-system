@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${isEdit} ? 'Editar usuário - PESCD' : 'Novo usuário - PESCD'"></title>
+    <title th:text="${isEdit} ? #{userForm.title.edit} : #{userForm.title.new}"></title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -66,48 +66,49 @@
 </head>
 <body>
 <div class="container">
-    <h1 th:text="${isEdit} ? 'Editar usuário' : 'Cadastrar usuário'"></h1>
+    <h1 th:text="${isEdit} ? #{userForm.heading.edit} : #{userForm.heading.new}"></h1>
 
     <form th:action="${isEdit} ? @{/admin/users/{id}(id=${userForm.id})} : @{/admin/users}"
           th:object="${userForm}"
           method="post">
 
         <div>
-            <label for="fullName">Nome completo</label>
+            <label for="fullName" th:text="#{userForm.fullName}">Nome completo</label>
             <input id="fullName" type="text" th:field="*{fullName}">
             <div class="error" th:errors="*{fullName}"></div>
         </div>
 
         <div>
-            <label for="email">E-mail</label>
+            <label for="email" th:text="#{userForm.email}">E-mail</label>
             <input id="email" type="email" th:field="*{email}">
             <div class="error" th:errors="*{email}"></div>
         </div>
 
         <div>
-            <label for="username">Nome de usuário</label>
+            <label for="username" th:text="#{userForm.username}">Nome de usuário</label>
             <input id="username" type="text" th:field="*{username}">
             <div class="error" th:errors="*{username}"></div>
         </div>
 
         <div>
-            <label for="password" th:text="${isEdit} ? 'Senha (opcional para manter a atual)' : 'Senha'"></label>
+            <label for="password" th:text="${isEdit} ? #{userForm.password.edit} : #{userForm.password}"></label>
             <input id="password" type="password" th:field="*{password}">
             <div class="error" th:errors="*{password}"></div>
         </div>
 
         <div>
-            <label for="role">Perfil</label>
+            <label for="role" th:text="#{userForm.role}">Perfil</label>
             <select id="role" th:field="*{role}">
-                <option value="">Selecione</option>
-                <option th:each="role : ${roles}" th:value="${role}" th:text="${role.displayName}"></option>
+                <option value="" th:text="#{userForm.roleSelect}">Selecione</option>
+                <option th:each="role : ${roles}" th:value="${role}"
+                        th:text="${#messages.msg('role.' + role.name())}"></option>
             </select>
             <div class="error" th:errors="*{role}"></div>
         </div>
 
         <div class="actions">
-            <button type="submit" class="primary">Salvar</button>
-            <a th:href="@{/admin/users}" class="secondary">Cancelar</a>
+            <button type="submit" class="primary" th:text="#{common.save}">Salvar</button>
+            <a th:href="@{/admin/users}" class="secondary" th:text="#{common.cancel}">Cancelar</a>
         </div>
     </form>
 </div>

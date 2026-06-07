@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Responsável — Minhas Ofertas</title>
+    <title th:text="#{respDashboard.title}">Responsável — Minhas Ofertas</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -143,38 +143,38 @@
 
     <div class="topbar">
         <div>
-            <h1>Minhas Ofertas (Responsável)</h1>
-            <p class="subtitle" th:text="'Prof. ' + ${professor.fullName}"></p>
+            <h1 th:text="#{respDashboard.heading}">Minhas Ofertas (Responsável)</h1>
+            <p class="subtitle" th:text="#{respDashboard.profPrefix} + ' ' + ${professor.fullName}"></p>
         </div>
         <div style="display:flex; gap:10px;">
-            <a th:href="@{/dashboard}" class="btn btn-secondary">← Painel</a>
+            <a th:href="@{/dashboard}" class="btn btn-secondary" th:text="'← ' + #{respDashboard.panel}">← Painel</a>
             <form th:action="@{/logout}" method="post" style="margin:0;">
-                <button type="submit" class="btn btn-secondary">Logout</button>
+                <button type="submit" class="btn btn-secondary" th:text="#{common.logout}">Logout</button>
             </form>
         </div>
     </div>
 
     <div class="empty-state" th:if="${#lists.isEmpty(dashboard)}">
-        <strong>Nenhuma oferta encontrada.</strong>
-        <p>Você ainda não está atribuído como professor responsável de nenhuma oferta.</p>
+        <strong th:text="#{respDashboard.emptyTitle}">Nenhuma oferta encontrada.</strong>
+        <p th:text="#{respDashboard.emptyText}">Você ainda não está atribuído como professor responsável de nenhuma oferta.</p>
     </div>
 
     <div class="offer-block" th:each="item : ${dashboard}">
 
         <div class="offer-header">
             <span class="offer-name" th:text="${item.offer.name}"></span>
-            <span class="offer-meta" th:text="${item.offer.semester} + ' · ' + ${item.offer.status}"></span>
+            <span class="offer-meta" th:text="${item.offer.semester + ' · ' + #messages.msg('offerStatus.' + item.offer.status.name())}"></span>
         </div>
 
         <div style="padding:15px; display:flex; gap:10px;">
 
             <a th:href="@{/professor/responsavel/ofertas/{id}(id=${item.offer.id})}"
-               class="btn btn-secondary">
+               class="btn btn-secondary" th:text="#{respDashboard.viewOffer}">
                 Ver Oferta
             </a>
 
             <a th:href="@{/professor/responsavel/ofertas/{id}/encerrar(id=${item.offer.id})}"
-               class="btn btn-primary">
+               class="btn btn-primary" th:text="#{respDashboard.closeOffer}">
                 Encerrar Oferta
             </a>
 
@@ -183,10 +183,10 @@
         <table>
             <thead>
             <tr>
-                <th>Aluno</th>
-                <th>E-mail</th>
-                <th>Status</th>
-                <th>Ações</th>
+                <th th:text="#{respDashboard.col.student}">Aluno</th>
+                <th th:text="#{respDashboard.col.email}">E-mail</th>
+                <th th:text="#{respDashboard.col.status}">Status</th>
+                <th th:text="#{respDashboard.col.actions}">Ações</th>
             </tr>
             </thead>
             <tbody>
@@ -196,21 +196,21 @@
                 <td>
                     <span class="status"
                           th:classappend="'status-' + ${#strings.toLowerCase(os.status.name())}"
-                          th:text="${os.status.displayName}">
+                          th:text="${#messages.msg('studentStatus.' + os.status.name())}">
                     </span>
                 </td>
                 <td>
                     <!-- PR.01: Concluir Relatório -->
                     <a th:if="${os.status.name() == 'RELATORIO_APROVADO_SUPERVISOR'}"
                        th:href="@{/professor/responsavel/ofertas/{oId}/alunos/{sId}/concluir-relatorio(oId=${item.offer.id}, sId=${os.student.id})}"
-                       class="btn btn-primary">
+                       class="btn btn-primary" th:text="#{respDashboard.concludeReport}">
                         Concluir Relatório
                     </a>
 
                     <!-- PR.02: Analisar Documentação -->
                     <a th:if="${os.status.name() == 'DOCUMENTACAO_ENVIADA'}"
                        th:href="@{/professor/responsavel/ofertas/{oId}/alunos/{sId}/analisar-documentacao(oId=${item.offer.id}, sId=${os.student.id})}"
-                       class="btn btn-primary">
+                       class="btn btn-primary" th:text="#{respDashboard.analyzeDoc}">
                         Analisar Documentação
                     </a>
 
