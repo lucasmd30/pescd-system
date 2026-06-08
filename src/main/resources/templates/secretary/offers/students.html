@@ -165,14 +165,9 @@
                     <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                 </div>
                 <div>
-                    <label for="username" th:text="#{manageStudents.username}">Nome de usuário *</label>
-                    <input type="text" id="username" th:field="*{username}">
-                    <div class="error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
-                </div>
-                <div>
-                    <label for="password" th:text="#{manageStudents.password}">Senha *</label>
-                    <input type="password" id="password" th:field="*{password}">
-                    <div class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                    <label for="ra" th:text="#{manageStudents.ra}">RA *</label>
+                    <input type="text" id="ra" th:field="*{ra}">
+                    <div class="error" th:if="${#fields.hasErrors('ra')}" th:errors="*{ra}"></div>
                 </div>
             </div>
             <button type="submit" class="primary" style="margin-top: 12px;" th:text="#{manageStudents.addButton}">Adicionar aluno</button>
