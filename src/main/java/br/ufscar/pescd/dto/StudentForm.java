@@ -16,9 +16,6 @@ public class StudentForm {
     @Email(message = "Informe um e-mail válido.")
     private String email;
 
-    @NotBlank(message = "O nome de usuário é obrigatório.")
-    private String username;
-
-    @NotBlank(message = "A senha é obrigatória.")
-    private String password;
+    @NotBlank(message = "O RA é obrigatório.")
+    private String ra;
 }

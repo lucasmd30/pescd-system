@@ -111,14 +111,14 @@ public class SecretaryOfferService {
         User student = userRepository.findByEmail(form.getEmail()).orElse(null);
 
         if (student == null) {
-            if (userRepository.existsByUsername(form.getUsername())) {
-                throw new IllegalArgumentException("Já existe um usuário com este nome de usuário.");
+            if (userRepository.existsByUsername(form.getEmail())) {
+                throw new IllegalArgumentException("Já existe um usuário com este e-mail.");
             }
             student = new User();
             student.setFullName(form.getFullName());
             student.setEmail(form.getEmail());
-            student.setUsername(form.getUsername());
-            student.setPassword(passwordEncoder.encode(form.getPassword()));
+            student.setUsername(form.getEmail());
+            student.setPassword(passwordEncoder.encode(form.getRa()));
             student.setRole(UserRole.ALUNO);
             student.setEnabled(true);
             student = userRepository.save(student);
