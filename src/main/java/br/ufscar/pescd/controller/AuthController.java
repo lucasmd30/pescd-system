@@ -1,5 +1,6 @@
 package br.ufscar.pescd.controller;
 
+import br.ufscar.pescd.security.RoleRedirectService;
 import br.ufscar.pescd.service.OfferService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -10,9 +11,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class AuthController {
 
     private final OfferService offerService;
+    private final RoleRedirectService roleRedirectService;
 
-    public AuthController(OfferService offerService) {
+    public AuthController(
+            OfferService offerService,
+            RoleRedirectService roleRedirectService
+    ) {
         this.offerService = offerService;
+        this.roleRedirectService = roleRedirectService;
     }
 
     @GetMapping("/login")
@@ -37,25 +43,7 @@ public class AuthController {
             return "redirect:/login";
         }
 
-        boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
-        if (isAdmin) {
-            return "redirect:/admin/users";
-        }
-
-        boolean isSecretario = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_SECRETARIO"));
-        if (isSecretario) {
-            return "redirect:/dashboard/secretario";
-        }
-
-        boolean isProfessor = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_PROFESSOR"));
-        if (isProfessor) {
-            return "redirect:/dashboard/professor";
-        }
-
-        return "redirect:/aluno/ofertas";
+        return "redirect:" + roleRedirectService.resolveRedirectPath(authentication.getAuthorities());
     }
 
     @GetMapping("/dashboard/secretario")

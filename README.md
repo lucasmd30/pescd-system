@@ -71,3 +71,4 @@ Repositório do sistema PESCD: [lucasmd30/pescd-system](https://github.com/lucas
 
 - [01f3803 - Implementa S.01, S.02 e AL.01-AL.04 (fluxo do aluno)](https://github.com/lucasmd30/pescd-system/commit/01f3803)
 - [5e99e58 - Implementa internacionalização](https://github.com/lucasmd30/pescd-system/commit/5e99e58)
+
