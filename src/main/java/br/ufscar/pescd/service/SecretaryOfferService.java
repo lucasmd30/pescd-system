@@ -2,7 +2,11 @@ package br.ufscar.pescd.service;
 
 import br.ufscar.pescd.entity.OfferStudentStatusLog;
 import br.ufscar.pescd.repository.OfferStudentStatusLogRepository;
+import br.ufscar.pescd.dto.OfferDetailsResponse;
 import br.ufscar.pescd.dto.OfferForm;
+import br.ufscar.pescd.dto.OfferStudentDetailsResponse;
+import br.ufscar.pescd.dto.OfferSummaryResponse;
+import br.ufscar.pescd.dto.SecretaryCloseOfferPreviewResponse;
 import br.ufscar.pescd.dto.StudentForm;
 import br.ufscar.pescd.entity.Offer;
 import br.ufscar.pescd.entity.OfferStudent;
@@ -30,29 +34,43 @@ import java.util.List;
 @Service
 public class SecretaryOfferService {
 
+    private static final String CLOSE_OFFER_INSTRUCTIONS =
+            "Confira os dados da oferta antes de confirmar o encerramento. "
+                    + "Ao confirmar, os créditos serão atribuídos aos alunos e a oferta será concluída.";
+
     private final OfferRepository offerRepository;
     private final OfferStudentRepository offerStudentRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final StatusChangeLogRepository statusChangeLogRepository;
+    private final OfferApiMapper offerApiMapper;
 
     public SecretaryOfferService(
             OfferRepository offerRepository,
             OfferStudentRepository offerStudentRepository,
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
-            StatusChangeLogRepository statusChangeLogRepository
+            StatusChangeLogRepository statusChangeLogRepository,
+            OfferApiMapper offerApiMapper
     ) {
         this.offerRepository = offerRepository;
         this.offerStudentRepository = offerStudentRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.statusChangeLogRepository = statusChangeLogRepository;
+        this.offerApiMapper = offerApiMapper;
     }
 
     @Transactional(readOnly = true)
     public List<Offer> listOffers() {
         return offerRepository.findAllByOrderBySemesterDesc();
+    }
+
+    @Transactional(readOnly = true)
+    public List<OfferSummaryResponse> listOffersForApi() {
+        return listOffers().stream()
+                .map(offerApiMapper::toOfferSummary)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -65,6 +83,32 @@ public class SecretaryOfferService {
     public List<OfferStudent> getOfferStudents(Long offerId) {
         Offer offer = getOffer(offerId);
         return offerStudentRepository.findByOffer(offer);
+    }
+
+    @Transactional(readOnly = true)
+    public OfferDetailsResponse getOfferDetailsForApi(Long offerId) {
+        Offer offer = getOffer(offerId);
+        return offerApiMapper.toOfferDetails(offer, offerStudentRepository.findByOffer(offer));
+    }
+
+    @Transactional(readOnly = true)
+    public OfferStudentDetailsResponse getStudentDetailsForApi(Long offerId, Long offerStudentId) {
+        Offer offer = getOffer(offerId);
+        OfferStudent offerStudent = getOfferStudent(offerStudentId);
+        if (!offerStudent.getOffer().getId().equals(offer.getId())) {
+            throw new IllegalArgumentException("O aluno informado não pertence a esta oferta.");
+        }
+        return offerApiMapper.toOfferStudentDetails(offerStudent);
+    }
+
+    @Transactional(readOnly = true)
+    public SecretaryCloseOfferPreviewResponse getCloseOfferPreviewForApi(Long offerId) {
+        Offer offer = getOffer(offerId);
+        return new SecretaryCloseOfferPreviewResponse(
+                offerApiMapper.toOfferSummary(offer),
+                offer.getStatus() == OfferStatus.AGUARDANDO_ENCERRAMENTO_SECRETARIO,
+                CLOSE_OFFER_INSTRUCTIONS
+        );
     }
 
     @Transactional(readOnly = true)
@@ -196,7 +240,16 @@ public class SecretaryOfferService {
 
     @Transactional
     public void closeOffer(Long id) {
+        closeOffer(id, null);
+    }
 
+    @Transactional
+    public OfferSummaryResponse closeOfferForApi(Long id, String secretaryUsername) {
+        return offerApiMapper.toOfferSummary(closeOffer(id, secretaryUsername));
+    }
+
+    @Transactional
+    public Offer closeOffer(Long id, String secretaryUsername) {
         Offer offer = getOffer(id);
 
         if (offer.getStatus() != OfferStatus.AGUARDANDO_ENCERRAMENTO_SECRETARIO) {
@@ -207,8 +260,13 @@ public class SecretaryOfferService {
 
         offer.setStatus(OfferStatus.CONCLUIDA);
         offer.setClosedAt(LocalDateTime.now());
+        if (secretaryUsername != null) {
+            User secretary = userRepository.findByUsername(secretaryUsername)
+                    .orElseThrow(() -> new IllegalArgumentException("Secretário autenticado não encontrado."));
+            offer.setClosedBy(secretary);
+        }
 
-        offerRepository.save(offer);
+        return offerRepository.save(offer);
     }
 
 

@@ -40,6 +40,8 @@ public class Offer {
 
     private LocalDateTime closedAt;
 
+    private LocalDateTime closureRequestedAt;
+
     @Column(columnDefinition = "TEXT")
     private String lessonsLearned;
 
@@ -50,6 +52,14 @@ public class Offer {
     @ManyToOne
     @JoinColumn(name = "responsible_professor_id")
     private User responsibleProfessor;
+
+    @ManyToOne
+    @JoinColumn(name = "closure_requested_by_id")
+    private User closureRequestedBy;
+
+    @ManyToOne
+    @JoinColumn(name = "closed_by_id")
+    private User closedBy;
 
     @PrePersist
     protected void onCreate() {
