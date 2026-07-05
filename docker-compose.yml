@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: pescd-db
+    environment:
+      POSTGRES_DB: pescd
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1234"
+    ports:
+      - "5432:5432"
+    volumes:
+      - pescd_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  pescd_data:

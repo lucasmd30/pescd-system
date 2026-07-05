@@ -1,18 +1,22 @@
 package br.ufscar.pescd.service;
 
+import br.ufscar.pescd.dto.DocumentationDetailsResponse;
 import br.ufscar.pescd.dto.OfferDetailsResponse;
 import br.ufscar.pescd.dto.OfferStudentDetailsResponse;
 import br.ufscar.pescd.dto.OfferStudentSummaryResponse;
 import br.ufscar.pescd.dto.OfferSummaryResponse;
+import br.ufscar.pescd.dto.ReportDetailsResponse;
 import br.ufscar.pescd.dto.ResponsibleCloseOfferSummaryResponse;
 import br.ufscar.pescd.dto.StatusLogResponse;
 import br.ufscar.pescd.dto.UserSummaryResponse;
+import br.ufscar.pescd.dto.WorkPlanDetailsResponse;
 import br.ufscar.pescd.entity.Documentation;
 import br.ufscar.pescd.entity.Offer;
 import br.ufscar.pescd.entity.OfferStudent;
 import br.ufscar.pescd.entity.Report;
 import br.ufscar.pescd.entity.StatusChangeLog;
 import br.ufscar.pescd.entity.User;
+import br.ufscar.pescd.entity.WorkPlan;
 import br.ufscar.pescd.enums.GradeOption;
 import br.ufscar.pescd.repository.DocumentationRepository;
 import br.ufscar.pescd.repository.OfferStudentRepository;
@@ -178,6 +182,58 @@ public class OfferApiMapper {
                 log.getNewStatus().getDisplayName(),
                 log.getDescription(),
                 log.getChangedAt()
+        );
+    }
+
+    public WorkPlanDetailsResponse toWorkPlanDetails(WorkPlan plan) {
+        return new WorkPlanDetailsResponse(
+                plan.getId(),
+                plan.getDisciplineCode(),
+                plan.getDisciplineName(),
+                plan.getDisciplineCourse(),
+                plan.getFileName(),
+                plan.getContentType(),
+                plan.getSubmittedAt(),
+                plan.getSupervisorParecer(),
+                plan.getSupervisorApprovedAt()
+        );
+    }
+
+    public ReportDetailsResponse toReportDetails(Report report) {
+        return new ReportDetailsResponse(
+                report.getId(),
+                report.getFrequency(),
+                report.getFileName(),
+                report.getContentType(),
+                report.getSubmittedAt(),
+                report.getSupervisorParecer(),
+                report.getSupervisorFrequencia(),
+                report.getSupervisorNotaSugestao(),
+                report.getSupervisorNotaSugestao() != null ? report.getSupervisorNotaSugestao().getDisplayName() : null,
+                report.getSupervisorApprovedAt(),
+                report.getResponsavelParecer(),
+                report.getResponsavelFrequencia(),
+                report.getResponsavelNota(),
+                report.getResponsavelNota() != null ? report.getResponsavelNota().getDisplayName() : null,
+                report.getResponsavelApprovedAt()
+        );
+    }
+
+    public DocumentationDetailsResponse toDocumentationDetails(Documentation doc) {
+        return new DocumentationDetailsResponse(
+                doc.getId(),
+                doc.getInstitutionName(),
+                doc.getDisciplineName(),
+                doc.getDisciplineCourse(),
+                doc.getWorkloadHours(),
+                doc.getFileName(),
+                doc.getContentType(),
+                doc.getSubmittedAt(),
+                doc.getResponsavelParecer(),
+                doc.getResponsavelFrequencia(),
+                doc.getResponsavelNota(),
+                doc.getResponsavelNota() != null ? doc.getResponsavelNota().getDisplayName() : null,
+                doc.getResponsavelApprovedAt()
         );
     }
 

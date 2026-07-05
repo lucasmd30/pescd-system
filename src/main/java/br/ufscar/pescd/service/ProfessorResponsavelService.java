@@ -2,9 +2,12 @@ package br.ufscar.pescd.service;
 
 import br.ufscar.pescd.dto.AnalyzeDocumentationFormDTO;
 import br.ufscar.pescd.dto.ConcludeReportFormDTO;
+import br.ufscar.pescd.dto.DocumentationDetailsResponse;
 import br.ufscar.pescd.dto.OfferDetailsResponse;
+import br.ufscar.pescd.dto.OfferStudentDetailsResponse;
 import br.ufscar.pescd.dto.OfferStudentSummaryResponse;
 import br.ufscar.pescd.dto.OfferSummaryResponse;
+import br.ufscar.pescd.dto.ReportDetailsResponse;
 import br.ufscar.pescd.dto.ResponsavelDashboardDTO;
 import br.ufscar.pescd.dto.ResponsibleCloseOfferSummaryResponse;
 import br.ufscar.pescd.entity.*;
@@ -121,6 +124,12 @@ public class ProfessorResponsavelService {
     }
 
     @Transactional(readOnly = true)
+    public OfferStudentDetailsResponse getEnrollmentDetailsForApi(Long offerId, Long studentId, User professor) {
+        OfferStudent os = getEnrollmentForResponsavel(offerId, studentId, professor);
+        return offerApiMapper.toOfferStudentDetails(os);
+    }
+
+    @Transactional(readOnly = true)
     public WorkPlan getWorkPlan(OfferStudent offerStudent) {
         return workPlanRepository.findByOfferStudent(offerStudent)
                 .orElseThrow(() -> new IllegalArgumentException("Plano de trabalho não encontrado."));
@@ -140,6 +149,12 @@ public class ProfessorResponsavelService {
     // -------------------------------------------------------------------------
     // PR.01 — Concluir Relatório
     // -------------------------------------------------------------------------
+
+    @Transactional(readOnly = true)
+    public ReportDetailsResponse getReportDetailsForApi(Long offerId, Long studentId, User professor) {
+        OfferStudent os = getEnrollmentForResponsavel(offerId, studentId, professor);
+        return offerApiMapper.toReportDetails(getReport(os));
+    }
 
     @Transactional
     public void concludeReport(Long offerId, Long studentId, User professor, ConcludeReportFormDTO form) {
@@ -163,6 +178,17 @@ public class ProfessorResponsavelService {
                 "Relatório concluído pelo professor responsável");
     }
 
+    @Transactional
+    public OfferStudentSummaryResponse concludeReportForApi(
+            Long offerId,
+            Long studentId,
+            User professor,
+            ConcludeReportFormDTO form
+    ) {
+        concludeReport(offerId, studentId, professor, form);
+        return offerApiMapper.toOfferStudentSummary(getEnrollmentForResponsavel(offerId, studentId, professor));
+    }
+
     // -------------------------------------------------------------------------
     // PR.02 — Analisar Documentação
     // -------------------------------------------------------------------------
@@ -171,6 +197,12 @@ public class ProfessorResponsavelService {
     public Documentation getDocumentation(OfferStudent offerStudent) {
         return documentationRepository.findByOfferStudent(offerStudent)
                 .orElseThrow(() -> new IllegalArgumentException("Documentação não encontrada."));
+    }
+
+    @Transactional(readOnly = true)
+    public DocumentationDetailsResponse getDocumentationDetailsForApi(Long offerId, Long studentId, User professor) {
+        OfferStudent os = getEnrollmentForResponsavel(offerId, studentId, professor);
+        return offerApiMapper.toDocumentationDetails(getDocumentation(os));
     }
 
     @Transactional(readOnly = true)
@@ -264,6 +296,17 @@ public class ProfessorResponsavelService {
 
         changeStatus(os, StudentOfferStatus.CONCLUIDO_RESPONSAVEL,
                 "Documentação analisada pelo professor responsável");
+    }
+
+    @Transactional
+    public OfferStudentSummaryResponse analyzeDocumentationForApi(
+            Long offerId,
+            Long studentId,
+            User professor,
+            AnalyzeDocumentationFormDTO form
+    ) {
+        analyzeDocumentation(offerId, studentId, professor, form);
+        return offerApiMapper.toOfferStudentSummary(getEnrollmentForResponsavel(offerId, studentId, professor));
     }
 
     // -------------------------------------------------------------------------

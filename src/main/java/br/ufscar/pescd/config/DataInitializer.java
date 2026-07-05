@@ -107,8 +107,8 @@ public class DataInitializer implements CommandLineRunner {
         enroll(aluno2, offer1, StudentOfferStatus.NAO_ENVIADO);
         enroll(aluno3, offer2, StudentOfferStatus.NAO_ENVIADO);
         enroll(aluno4, offer2, StudentOfferStatus.NAO_ENVIADO);
-        enroll(aluno1, offer3, StudentOfferStatus.NAO_ENVIADO);
-        enroll(aluno4, offer3, StudentOfferStatus.NAO_ENVIADO);
+        enroll(aluno1, offer3, StudentOfferStatus.CONCLUIDO_RESPONSAVEL);
+        enroll(aluno4, offer3, StudentOfferStatus.CONCLUIDO_RESPONSAVEL);
         enroll(aluno2, offer4, StudentOfferStatus.NAO_ENVIADO);
 
         // --- Seed PS.01 / PS.02: João Lima em offer1 com PLANO_ENVIADO sob supervisão de Prof. Levada ---

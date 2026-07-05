@@ -1,7 +1,13 @@
 package br.ufscar.pescd.service;
 
+import br.ufscar.pescd.dto.ApprovePlanFormDTO;
 import br.ufscar.pescd.dto.ApproveReportFormDTO;
+import br.ufscar.pescd.dto.OfferDetailsResponse;
+import br.ufscar.pescd.dto.OfferStudentDetailsResponse;
+import br.ufscar.pescd.dto.OfferStudentSummaryResponse;
+import br.ufscar.pescd.dto.ReportDetailsResponse;
 import br.ufscar.pescd.dto.SupervisorDashboardDTO;
+import br.ufscar.pescd.dto.WorkPlanDetailsResponse;
 import br.ufscar.pescd.entity.*;
 import br.ufscar.pescd.enums.StudentOfferStatus;
 import br.ufscar.pescd.repository.*;
@@ -21,17 +27,20 @@ public class SupervisorProfessorService {
     private final WorkPlanRepository workPlanRepository;
     private final ReportRepository reportRepository;
     private final StatusChangeLogRepository statusChangeLogRepository;
+    private final OfferApiMapper offerApiMapper;
 
     public SupervisorProfessorService(
             OfferStudentRepository offerStudentRepository,
             WorkPlanRepository workPlanRepository,
             ReportRepository reportRepository,
-            StatusChangeLogRepository statusChangeLogRepository
+            StatusChangeLogRepository statusChangeLogRepository,
+            OfferApiMapper offerApiMapper
     ) {
         this.offerStudentRepository = offerStudentRepository;
         this.workPlanRepository = workPlanRepository;
         this.reportRepository = reportRepository;
         this.statusChangeLogRepository = statusChangeLogRepository;
+        this.offerApiMapper = offerApiMapper;
     }
 
     // -------------------------------------------------------------------------
@@ -54,6 +63,19 @@ public class SupervisorProfessorService {
                         Comparator.reverseOrder()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<OfferDetailsResponse> getDashboardForApi(User professor) {
+        return getDashboard(professor).stream()
+                .map(item -> offerApiMapper.toOfferDetails(item.getOffer(), item.getSupervisedStudents()))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public OfferStudentDetailsResponse getEnrollmentDetailsForApi(Long offerId, Long studentId, User professor) {
+        OfferStudent os = getEnrollmentForSupervisor(offerId, studentId, professor);
+        return offerApiMapper.toOfferStudentDetails(os);
     }
 
     // -------------------------------------------------------------------------
@@ -81,6 +103,12 @@ public class SupervisorProfessorService {
                 .orElseThrow(() -> new IllegalArgumentException("Plano de trabalho não encontrado."));
     }
 
+    @Transactional(readOnly = true)
+    public WorkPlanDetailsResponse getWorkPlanDetailsForApi(Long offerId, Long studentId, User professor) {
+        OfferStudent os = getEnrollmentForSupervisor(offerId, studentId, professor);
+        return offerApiMapper.toWorkPlanDetails(getWorkPlan(os));
+    }
+
     @Transactional
     public void approvePlan(Long offerId, Long studentId, User professor, String parecer) {
 
@@ -100,6 +128,17 @@ public class SupervisorProfessorService {
         changeStatus(os, StudentOfferStatus.PLANO_APROVADO, "Plano de trabalho aprovado pelo professor supervisor");
     }
 
+    @Transactional
+    public OfferStudentSummaryResponse approvePlanForApi(
+            Long offerId,
+            Long studentId,
+            User professor,
+            ApprovePlanFormDTO form
+    ) {
+        approvePlan(offerId, studentId, professor, form.getParecer());
+        return offerApiMapper.toOfferStudentSummary(getEnrollmentForSupervisor(offerId, studentId, professor));
+    }
+
     // -------------------------------------------------------------------------
     // PS.03 — Aprovar Relatório
     // -------------------------------------------------------------------------
@@ -113,6 +152,12 @@ public class SupervisorProfessorService {
     @Transactional(readOnly = true)
     public List<StatusChangeLog> getStatusLogs(OfferStudent offerStudent) {
         return statusChangeLogRepository.findByOfferStudentOrderByChangedAtAsc(offerStudent);
+    }
+
+    @Transactional(readOnly = true)
+    public ReportDetailsResponse getReportDetailsForApi(Long offerId, Long studentId, User professor) {
+        OfferStudent os = getEnrollmentForSupervisor(offerId, studentId, professor);
+        return offerApiMapper.toReportDetails(getReport(os));
     }
 
     @Transactional
@@ -137,8 +182,19 @@ public class SupervisorProfessorService {
                 "Relatório aprovado pelo professor supervisor");
     }
 
+    @Transactional
+    public OfferStudentSummaryResponse approveReportForApi(
+            Long offerId,
+            Long studentId,
+            User professor,
+            ApproveReportFormDTO form
+    ) {
+        approveReport(offerId, studentId, professor, form);
+        return offerApiMapper.toOfferStudentSummary(getEnrollmentForSupervisor(offerId, studentId, professor));
+    }
+
     // -------------------------------------------------------------------------
-    // Utilitário — log de status (mesmo padrão do StudentOfferService)
+    // Utilitário — log de status
     // -------------------------------------------------------------------------
 
     private void changeStatus(OfferStudent os, StudentOfferStatus newStatus, String description) {
