@@ -12,6 +12,15 @@ docker compose up -d      # sobe postgres (5432) e seaweedfs (9333/8080/8888)
 ./mvnw spring-boot:run    # sobe a API Spring Boot em http://localhost:8080
 ```
 
+### Front-end React
+
+O sistema agora tem um front-end em React (Vite) que consome a REST API,
+substituindo as telas Thymeleaf. Veja [`frontend/README.md`](frontend/README.md):
+
+```bash
+cd frontend && npm install && npm run dev   # http://localhost:5173
+```
+
 ### Armazenamento de arquivos no SeaweedFS
 
 Os arquivos PDF (plano de trabalho, documentação e relatório) **não são mais
