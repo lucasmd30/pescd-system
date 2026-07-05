@@ -22,13 +22,14 @@ services:
   seaweedfs:
     image: chrislusf/seaweedfs:latest
     container_name: pescd-seaweedfs
-    # -ip=localhost faz o master anunciar o volume como localhost:8080, que e
+    # -ip=localhost faz o master anunciar o volume como localhost:8081, que e
     # alcancavel a partir do host (onde roda a aplicacao Spring) pelas portas
     # publicadas abaixo. -ip.bind=0.0.0.0 escuta em todas as interfaces.
-    command: "server -dir=/data -master.port=9333 -volume.port=8080 -filer -ip=localhost -ip.bind=0.0.0.0"
+    # O volume usa a 8081 (nao a 8080) para nao colidir com a API Spring Boot.
+    command: "server -dir=/data -master.port=9333 -volume.port=8081 -filer -ip=localhost -ip.bind=0.0.0.0"
     ports:
       - "9333:9333"   # master
-      - "8080:8080"   # volume
+      - "8081:8081"   # volume
       - "8888:8888"   # filer
     volumes:
       - pescd-seaweedfs-data:/data
