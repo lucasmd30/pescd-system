@@ -43,8 +43,9 @@ public class Documentation {
     @Column(nullable = false)
     private String contentType;
 
-    @Column(nullable = false, columnDefinition = "bytea")
-    private byte[] fileContent;
+    /** Identificador do arquivo no SeaweedFS (fid), ex.: "3,01637037d6". */
+    @Column(name = "file_fid", nullable = false)
+    private String fileFid;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime submittedAt;

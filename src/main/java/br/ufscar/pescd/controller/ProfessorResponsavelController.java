@@ -7,6 +7,7 @@ import br.ufscar.pescd.entity.*;
 import br.ufscar.pescd.enums.GradeOption;
 import br.ufscar.pescd.repository.UserRepository;
 import br.ufscar.pescd.service.ProfessorResponsavelService;
+import br.ufscar.pescd.storage.SeaweedFsStorageService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -28,13 +29,16 @@ public class ProfessorResponsavelController {
 
     private final ProfessorResponsavelService professorResponsavelService;
     private final UserRepository userRepository;
+    private final SeaweedFsStorageService storageService;
 
     public ProfessorResponsavelController(
             ProfessorResponsavelService professorResponsavelService,
-            UserRepository userRepository
+            UserRepository userRepository,
+            SeaweedFsStorageService storageService
     ) {
         this.professorResponsavelService = professorResponsavelService;
         this.userRepository = userRepository;
+        this.storageService = storageService;
     }
 
     // -------------------------------------------------------------------------
@@ -303,7 +307,7 @@ public class ProfessorResponsavelController {
                 .contentType(MediaType.parseMediaType(plan.getContentType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "inline; filename=\"" + plan.getFileName() + "\"")
-                .body(plan.getFileContent());
+                .body(storageService.read(plan.getFileFid()));
     }
 
     @GetMapping("/ofertas/{offerId}/alunos/{studentId}/relatorio/download")
@@ -322,7 +326,7 @@ public class ProfessorResponsavelController {
                 .contentType(MediaType.parseMediaType(report.getContentType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "inline; filename=\"" + report.getFileName() + "\"")
-                .body(report.getFileContent());
+                .body(storageService.read(report.getFileFid()));
     }
 
     @GetMapping("/ofertas/{offerId}/alunos/{studentId}/documentacao/download")
@@ -341,7 +345,7 @@ public class ProfessorResponsavelController {
                 .contentType(MediaType.parseMediaType(doc.getContentType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "inline; filename=\"" + doc.getFileName() + "\"")
-                .body(doc.getFileContent());
+                .body(storageService.read(doc.getFileFid()));
     }
 
     // -------------------------------------------------------------------------

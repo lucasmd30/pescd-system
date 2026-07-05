@@ -16,6 +16,9 @@ import br.ufscar.pescd.repository.OfferStudentRepository;
 import br.ufscar.pescd.repository.UserRepository;
 import br.ufscar.pescd.repository.ReportRepository;
 import br.ufscar.pescd.repository.WorkPlanRepository;
+import br.ufscar.pescd.storage.SeaweedFsStorageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -34,6 +37,9 @@ public class DataInitializer implements CommandLineRunner {
     private final ReportRepository reportRepository;
     private final DocumentationRepository documentationRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SeaweedFsStorageService storageService;
+
+    private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
 
     public DataInitializer(
             UserRepository userRepository,
@@ -42,7 +48,8 @@ public class DataInitializer implements CommandLineRunner {
             WorkPlanRepository workPlanRepository,
             ReportRepository reportRepository,
             DocumentationRepository documentationRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            SeaweedFsStorageService storageService
     ) {
         this.userRepository = userRepository;
         this.offerRepository = offerRepository;
@@ -51,6 +58,23 @@ public class DataInitializer implements CommandLineRunner {
         this.reportRepository = reportRepository;
         this.documentationRepository = documentationRepository;
         this.passwordEncoder = passwordEncoder;
+        this.storageService = storageService;
+    }
+
+    /**
+     * Envia um arquivo de exemplo ao SeaweedFS e devolve o fid. Se o SeaweedFS
+     * não estiver disponível no boot, apenas registra um aviso e devolve null,
+     * fazendo o seed do arquivo ser ignorado (a aplicação ainda sobe).
+     */
+    private String storeSeedFile(String content, String fileName) {
+        try {
+            return storageService.store(
+                    content.getBytes(StandardCharsets.UTF_8), fileName, "application/pdf");
+        } catch (RuntimeException ex) {
+            log.warn("SeaweedFS indisponível ao popular o arquivo de exemplo '{}': {}. "
+                    + "O seed deste arquivo será ignorado.", fileName, ex.getMessage());
+            return null;
+        }
     }
 
     @Override
@@ -190,6 +214,12 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
 
+        String fid = storeSeedFile(
+                "%PDF-1.4\n% Plano de trabalho de exemplo (PESCD)\n", "plano-exemplo.pdf");
+        if (fid == null) {
+            return;
+        }
+
         WorkPlan workPlan = new WorkPlan();
         workPlan.setOfferStudent(offerStudent);
         workPlan.setDisciplineCode("1000123");
@@ -197,8 +227,7 @@ public class DataInitializer implements CommandLineRunner {
         workPlan.setDisciplineCourse("Bacharelado em Ciência da Computação");
         workPlan.setFileName("plano-exemplo.pdf");
         workPlan.setContentType("application/pdf");
-        workPlan.setFileContent(
-                "%PDF-1.4\n% Plano de trabalho de exemplo (PESCD)\n".getBytes(StandardCharsets.UTF_8));
+        workPlan.setFileFid(fid);
         workPlanRepository.save(workPlan);
     }
 
@@ -207,13 +236,18 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
 
+        String fid = storeSeedFile(
+                "%PDF-1.4\n% Relatório de exemplo (PESCD)\n", "relatorio-exemplo.pdf");
+        if (fid == null) {
+            return;
+        }
+
         Report report = new Report();
         report.setOfferStudent(offerStudent);
         report.setFrequency(85);
         report.setFileName("relatorio-exemplo.pdf");
         report.setContentType("application/pdf");
-        report.setFileContent(
-                "%PDF-1.4\n% Relatório de exemplo (PESCD)\n".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        report.setFileFid(fid);
         reportRepository.save(report);
     }
 
@@ -222,13 +256,18 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
 
+        String fid = storeSeedFile(
+                "%PDF-1.4\n% Relatório de exemplo (PESCD)\n", "relatorio-exemplo.pdf");
+        if (fid == null) {
+            return;
+        }
+
         Report report = new Report();
         report.setOfferStudent(offerStudent);
         report.setFrequency(90);
         report.setFileName("relatorio-exemplo.pdf");
         report.setContentType("application/pdf");
-        report.setFileContent(
-                "%PDF-1.4\n% Relatório de exemplo (PESCD)\n".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        report.setFileFid(fid);
         // Dados do supervisor (simulando PS.03 já concluído)
         report.setSupervisorParecer("Relatório bem elaborado. Aluno demonstrou domínio do conteúdo.");
         report.setSupervisorFrequencia(88);
@@ -258,6 +297,13 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
 
+        String fid = storeSeedFile(
+                "%PDF-1.4\n% Documentação comprobatória de exemplo (PESCD)\n",
+                "documentacao-exemplo.pdf");
+        if (fid == null) {
+            return;
+        }
+
         Documentation doc = new Documentation();
         doc.setOfferStudent(offerStudent);
         doc.setInstitutionName("Universidade Federal de São Carlos");
@@ -266,9 +312,7 @@ public class DataInitializer implements CommandLineRunner {
         doc.setWorkloadHours(60);
         doc.setFileName("documentacao-exemplo.pdf");
         doc.setContentType("application/pdf");
-        doc.setFileContent(
-                "%PDF-1.4\n% Documentação comprobatória de exemplo (PESCD)\n"
-                        .getBytes(StandardCharsets.UTF_8));
+        doc.setFileFid(fid);
         documentationRepository.save(doc);
     }
 

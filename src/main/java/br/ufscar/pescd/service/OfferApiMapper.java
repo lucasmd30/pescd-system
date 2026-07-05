@@ -8,6 +8,8 @@ import br.ufscar.pescd.dto.OfferSummaryResponse;
 import br.ufscar.pescd.dto.ReportDetailsResponse;
 import br.ufscar.pescd.dto.ResponsibleCloseOfferSummaryResponse;
 import br.ufscar.pescd.dto.StatusLogResponse;
+import br.ufscar.pescd.dto.StudentEnrollmentDetailsResponse;
+import br.ufscar.pescd.dto.StudentOfferSummaryResponse;
 import br.ufscar.pescd.dto.UserSummaryResponse;
 import br.ufscar.pescd.dto.WorkPlanDetailsResponse;
 import br.ufscar.pescd.entity.Documentation;
@@ -88,6 +90,34 @@ public class OfferApiMapper {
         return new OfferStudentDetailsResponse(
                 toOfferSummary(enrollment.getOffer()),
                 toOfferStudentSummary(enrollment),
+                toStatusLogs(enrollment)
+        );
+    }
+
+    public StudentOfferSummaryResponse toStudentOfferSummary(OfferStudent enrollment) {
+        return new StudentOfferSummaryResponse(
+                toOfferSummary(enrollment.getOffer()),
+                toOfferStudentSummary(enrollment)
+        );
+    }
+
+    public StudentEnrollmentDetailsResponse toStudentEnrollmentDetails(OfferStudent enrollment) {
+        WorkPlanDetailsResponse workPlan = workPlanRepository.findByOfferStudent(enrollment)
+                .map(this::toWorkPlanDetails)
+                .orElse(null);
+        DocumentationDetailsResponse documentation = documentationRepository.findByOfferStudent(enrollment)
+                .map(this::toDocumentationDetails)
+                .orElse(null);
+        ReportDetailsResponse report = reportRepository.findByOfferStudent(enrollment)
+                .map(this::toReportDetails)
+                .orElse(null);
+
+        return new StudentEnrollmentDetailsResponse(
+                toOfferSummary(enrollment.getOffer()),
+                toOfferStudentSummary(enrollment),
+                workPlan,
+                documentation,
+                report,
                 toStatusLogs(enrollment)
         );
     }

@@ -2,12 +2,16 @@ package br.ufscar.pescd.service;
 
 import br.ufscar.pescd.dto.DocumentationForm;
 import br.ufscar.pescd.dto.ReportForm;
+import br.ufscar.pescd.dto.StudentEnrollmentDetailsResponse;
+import br.ufscar.pescd.dto.StudentOfferSummaryResponse;
+import br.ufscar.pescd.dto.UserSummaryResponse;
 import br.ufscar.pescd.dto.WorkPlanForm;
 import br.ufscar.pescd.entity.*;
 import br.ufscar.pescd.enums.OfferStatus;
 import br.ufscar.pescd.enums.StudentOfferStatus;
 import br.ufscar.pescd.enums.UserRole;
 import br.ufscar.pescd.repository.*;
+import br.ufscar.pescd.storage.SeaweedFsStorageService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +30,8 @@ public class StudentOfferService {
     private final DocumentationRepository documentationRepository;
     private final ReportRepository reportRepository;
     private final StatusChangeLogRepository statusChangeLogRepository;
+    private final OfferApiMapper offerApiMapper;
+    private final SeaweedFsStorageService storageService;
 
     public StudentOfferService(
             OfferStudentRepository offerStudentRepository,
@@ -33,7 +39,9 @@ public class StudentOfferService {
             WorkPlanRepository workPlanRepository,
             DocumentationRepository documentationRepository,
             ReportRepository reportRepository,
-            StatusChangeLogRepository statusChangeLogRepository
+            StatusChangeLogRepository statusChangeLogRepository,
+            OfferApiMapper offerApiMapper,
+            SeaweedFsStorageService storageService
     ) {
         this.offerStudentRepository = offerStudentRepository;
         this.userRepository = userRepository;
@@ -41,6 +49,50 @@ public class StudentOfferService {
         this.documentationRepository = documentationRepository;
         this.reportRepository = reportRepository;
         this.statusChangeLogRepository = statusChangeLogRepository;
+        this.offerApiMapper = offerApiMapper;
+        this.storageService = storageService;
+    }
+
+    // ------------------------------------------------------------------------
+    // AL.01 a AL.04 - métodos que expõem o fluxo do aluno como REST API.
+    // ------------------------------------------------------------------------
+
+    @Transactional(readOnly = true)
+    public List<StudentOfferSummaryResponse> listEnrollmentsForApi(String username) {
+        return findStudentEnrollments(username).stream()
+                .map(offerApiMapper::toStudentOfferSummary)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public StudentEnrollmentDetailsResponse getEnrollmentDetailsForApi(Long offerStudentId, String username) {
+        OfferStudent enrollment = getEnrollment(offerStudentId, username);
+        return offerApiMapper.toStudentEnrollmentDetails(enrollment);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserSummaryResponse> listProfessorsForApi() {
+        return listProfessors().stream()
+                .map(offerApiMapper::toUserSummary)
+                .toList();
+    }
+
+    @Transactional
+    public StudentEnrollmentDetailsResponse submitWorkPlanForApi(Long offerStudentId, String username, WorkPlanForm form) {
+        submitWorkPlan(offerStudentId, username, form);
+        return getEnrollmentDetailsForApi(offerStudentId, username);
+    }
+
+    @Transactional
+    public StudentEnrollmentDetailsResponse submitDocumentationForApi(Long offerStudentId, String username, DocumentationForm form) {
+        submitDocumentation(offerStudentId, username, form);
+        return getEnrollmentDetailsForApi(offerStudentId, username);
+    }
+
+    @Transactional
+    public StudentEnrollmentDetailsResponse submitReportForApi(Long offerStudentId, String username, ReportForm form) {
+        submitReport(offerStudentId, username, form);
+        return getEnrollmentDetailsForApi(offerStudentId, username);
     }
 
     @Transactional(readOnly = true)
@@ -98,13 +150,15 @@ public class StudentOfferService {
         byte[] content = readPdf(form.getFile());
 
         WorkPlan workPlan = workPlanRepository.findByOfferStudent(enrollment).orElseGet(WorkPlan::new);
+        storageService.delete(workPlan.getFileFid());
         workPlan.setOfferStudent(enrollment);
         workPlan.setDisciplineCode(form.getDisciplineCode());
         workPlan.setDisciplineName(form.getDisciplineName());
         workPlan.setDisciplineCourse(form.getDisciplineCourse());
         workPlan.setFileName(form.getFile().getOriginalFilename());
         workPlan.setContentType(form.getFile().getContentType());
-        workPlan.setFileContent(content);
+        workPlan.setFileFid(storageService.store(content, form.getFile().getOriginalFilename(),
+                form.getFile().getContentType()));
         workPlanRepository.save(workPlan);
 
         enrollment.setSupervisor(supervisor);
@@ -121,6 +175,7 @@ public class StudentOfferService {
 
         Documentation documentation = documentationRepository.findByOfferStudent(enrollment)
                 .orElseGet(Documentation::new);
+        storageService.delete(documentation.getFileFid());
         documentation.setOfferStudent(enrollment);
         documentation.setInstitutionName(form.getInstitutionName());
         documentation.setDisciplineName(form.getDisciplineName());
@@ -128,7 +183,8 @@ public class StudentOfferService {
         documentation.setWorkloadHours(form.getWorkloadHours());
         documentation.setFileName(form.getFile().getOriginalFilename());
         documentation.setContentType(form.getFile().getContentType());
-        documentation.setFileContent(content);
+        documentation.setFileFid(storageService.store(content, form.getFile().getOriginalFilename(),
+                form.getFile().getContentType()));
         documentationRepository.save(documentation);
 
         changeStatus(enrollment, StudentOfferStatus.DOCUMENTACAO_ENVIADA, "Documentação enviada");
@@ -143,11 +199,13 @@ public class StudentOfferService {
         byte[] content = readPdf(form.getFile());
 
         Report report = reportRepository.findByOfferStudent(enrollment).orElseGet(Report::new);
+        storageService.delete(report.getFileFid());
         report.setOfferStudent(enrollment);
         report.setFrequency(form.getFrequency());
         report.setFileName(form.getFile().getOriginalFilename());
         report.setContentType(form.getFile().getContentType());
-        report.setFileContent(content);
+        report.setFileFid(storageService.store(content, form.getFile().getOriginalFilename(),
+                form.getFile().getContentType()));
         reportRepository.save(report);
 
         changeStatus(enrollment, StudentOfferStatus.RELATORIO_ENVIADO, "Relatório final enviado");

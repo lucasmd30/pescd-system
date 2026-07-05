@@ -13,6 +13,7 @@ import br.ufscar.pescd.entity.User;
 import br.ufscar.pescd.entity.WorkPlan;
 import br.ufscar.pescd.repository.UserRepository;
 import br.ufscar.pescd.service.SupervisorProfessorService;
+import br.ufscar.pescd.storage.SeaweedFsStorageService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -33,13 +34,16 @@ public class SupervisorProfessorApiController {
 
     private final SupervisorProfessorService supervisorProfessorService;
     private final UserRepository userRepository;
+    private final SeaweedFsStorageService storageService;
 
     public SupervisorProfessorApiController(
             SupervisorProfessorService supervisorProfessorService,
-            UserRepository userRepository
+            UserRepository userRepository,
+            SeaweedFsStorageService storageService
     ) {
         this.supervisorProfessorService = supervisorProfessorService;
         this.userRepository = userRepository;
+        this.storageService = storageService;
     }
 
     // -------------------------------------------------------------------------
@@ -101,7 +105,7 @@ public class SupervisorProfessorApiController {
                 .contentType(MediaType.parseMediaType(plan.getContentType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "inline; filename=\"" + plan.getFileName() + "\"")
-                .body(plan.getFileContent());
+                .body(storageService.read(plan.getFileFid()));
     }
 
     // -------------------------------------------------------------------------
@@ -144,7 +148,7 @@ public class SupervisorProfessorApiController {
                 .contentType(MediaType.parseMediaType(report.getContentType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "inline; filename=\"" + report.getFileName() + "\"")
-                .body(report.getFileContent());
+                .body(storageService.read(report.getFileFid()));
     }
 
     private User resolveUser(Authentication authentication) {

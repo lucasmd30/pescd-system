@@ -8,6 +8,7 @@ import br.ufscar.pescd.entity.OfferStudent;
 import br.ufscar.pescd.entity.Report;
 import br.ufscar.pescd.entity.WorkPlan;
 import br.ufscar.pescd.service.StudentOfferService;
+import br.ufscar.pescd.storage.SeaweedFsStorageService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -28,9 +29,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class StudentOfferController {
 
     private final StudentOfferService studentOfferService;
+    private final SeaweedFsStorageService storageService;
 
-    public StudentOfferController(StudentOfferService studentOfferService) {
+    public StudentOfferController(
+            StudentOfferService studentOfferService,
+            SeaweedFsStorageService storageService
+    ) {
         this.studentOfferService = studentOfferService;
+        this.storageService = storageService;
     }
 
 
@@ -181,7 +187,7 @@ public class StudentOfferController {
         if (workPlan == null) {
             return ResponseEntity.notFound().build();
         }
-        return pdfResponse(workPlan.getFileName(), workPlan.getFileContent());
+        return pdfResponse(workPlan.getFileName(), storageService.read(workPlan.getFileFid()));
     }
 
     @GetMapping("/{id}/documentacao/arquivo")
@@ -191,7 +197,7 @@ public class StudentOfferController {
         if (documentation == null) {
             return ResponseEntity.notFound().build();
         }
-        return pdfResponse(documentation.getFileName(), documentation.getFileContent());
+        return pdfResponse(documentation.getFileName(), storageService.read(documentation.getFileFid()));
     }
 
     @GetMapping("/{id}/relatorio/arquivo")
@@ -201,7 +207,7 @@ public class StudentOfferController {
         if (report == null) {
             return ResponseEntity.notFound().build();
         }
-        return pdfResponse(report.getFileName(), report.getFileContent());
+        return pdfResponse(report.getFileName(), storageService.read(report.getFileFid()));
     }
 
     private ResponseEntity<byte[]> pdfResponse(String fileName, byte[] content) {
