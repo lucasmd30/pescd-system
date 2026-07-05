@@ -6,8 +6,10 @@ import br.ufscar.pescd.dto.OfferDetailsResponse;
 import br.ufscar.pescd.dto.OfferForm;
 import br.ufscar.pescd.dto.OfferStudentDetailsResponse;
 import br.ufscar.pescd.dto.OfferSummaryResponse;
+import br.ufscar.pescd.dto.ImportStudentsResponse;
 import br.ufscar.pescd.dto.SecretaryCloseOfferPreviewResponse;
 import br.ufscar.pescd.dto.StudentForm;
+import br.ufscar.pescd.dto.UserSummaryResponse;
 import br.ufscar.pescd.entity.Offer;
 import br.ufscar.pescd.entity.OfferStudent;
 import br.ufscar.pescd.entity.User;
@@ -123,6 +125,35 @@ public class SecretaryOfferService {
     @Transactional(readOnly = true)
     public List<User> listProfessors() {
         return userRepository.findByRole(UserRole.PROFESSOR);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserSummaryResponse> listProfessorsForApi() {
+        return listProfessors().stream()
+                .map(offerApiMapper::toUserSummary)
+                .toList();
+    }
+
+    @Transactional
+    public OfferSummaryResponse createOfferForApi(OfferForm form, String creatorUsername) {
+        if (form.getStartDate() != null
+                && form.getEndDate() != null
+                && !form.getEndDate().isAfter(form.getStartDate())) {
+            throw new IllegalArgumentException("A data de fim deve ser depois da data de início.");
+        }
+        return offerApiMapper.toOfferSummary(createOffer(form, creatorUsername));
+    }
+
+    @Transactional
+    public OfferDetailsResponse addStudentForApi(Long offerId, StudentForm form) {
+        addStudent(offerId, form);
+        return getOfferDetailsForApi(offerId);
+    }
+
+    @Transactional
+    public ImportStudentsResponse importStudentsFromCsvForApi(Long offerId, MultipartFile file) {
+        int enrolled = importStudentsFromCsv(offerId, file);
+        return new ImportStudentsResponse(enrolled, getOfferDetailsForApi(offerId));
     }
 
     @Transactional

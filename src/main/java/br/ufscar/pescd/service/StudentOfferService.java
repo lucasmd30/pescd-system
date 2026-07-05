@@ -2,6 +2,9 @@ package br.ufscar.pescd.service;
 
 import br.ufscar.pescd.dto.DocumentationForm;
 import br.ufscar.pescd.dto.ReportForm;
+import br.ufscar.pescd.dto.StudentEnrollmentDetailsResponse;
+import br.ufscar.pescd.dto.StudentOfferSummaryResponse;
+import br.ufscar.pescd.dto.UserSummaryResponse;
 import br.ufscar.pescd.dto.WorkPlanForm;
 import br.ufscar.pescd.entity.*;
 import br.ufscar.pescd.enums.OfferStatus;
@@ -26,6 +29,7 @@ public class StudentOfferService {
     private final DocumentationRepository documentationRepository;
     private final ReportRepository reportRepository;
     private final StatusChangeLogRepository statusChangeLogRepository;
+    private final OfferApiMapper offerApiMapper;
 
     public StudentOfferService(
             OfferStudentRepository offerStudentRepository,
@@ -33,7 +37,8 @@ public class StudentOfferService {
             WorkPlanRepository workPlanRepository,
             DocumentationRepository documentationRepository,
             ReportRepository reportRepository,
-            StatusChangeLogRepository statusChangeLogRepository
+            StatusChangeLogRepository statusChangeLogRepository,
+            OfferApiMapper offerApiMapper
     ) {
         this.offerStudentRepository = offerStudentRepository;
         this.userRepository = userRepository;
@@ -41,6 +46,49 @@ public class StudentOfferService {
         this.documentationRepository = documentationRepository;
         this.reportRepository = reportRepository;
         this.statusChangeLogRepository = statusChangeLogRepository;
+        this.offerApiMapper = offerApiMapper;
+    }
+
+    // ------------------------------------------------------------------------
+    // AL.01 a AL.04 - métodos que expõem o fluxo do aluno como REST API.
+    // ------------------------------------------------------------------------
+
+    @Transactional(readOnly = true)
+    public List<StudentOfferSummaryResponse> listEnrollmentsForApi(String username) {
+        return findStudentEnrollments(username).stream()
+                .map(offerApiMapper::toStudentOfferSummary)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public StudentEnrollmentDetailsResponse getEnrollmentDetailsForApi(Long offerStudentId, String username) {
+        OfferStudent enrollment = getEnrollment(offerStudentId, username);
+        return offerApiMapper.toStudentEnrollmentDetails(enrollment);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserSummaryResponse> listProfessorsForApi() {
+        return listProfessors().stream()
+                .map(offerApiMapper::toUserSummary)
+                .toList();
+    }
+
+    @Transactional
+    public StudentEnrollmentDetailsResponse submitWorkPlanForApi(Long offerStudentId, String username, WorkPlanForm form) {
+        submitWorkPlan(offerStudentId, username, form);
+        return getEnrollmentDetailsForApi(offerStudentId, username);
+    }
+
+    @Transactional
+    public StudentEnrollmentDetailsResponse submitDocumentationForApi(Long offerStudentId, String username, DocumentationForm form) {
+        submitDocumentation(offerStudentId, username, form);
+        return getEnrollmentDetailsForApi(offerStudentId, username);
+    }
+
+    @Transactional
+    public StudentEnrollmentDetailsResponse submitReportForApi(Long offerStudentId, String username, ReportForm form) {
+        submitReport(offerStudentId, username, form);
+        return getEnrollmentDetailsForApi(offerStudentId, username);
     }
 
     @Transactional(readOnly = true)
