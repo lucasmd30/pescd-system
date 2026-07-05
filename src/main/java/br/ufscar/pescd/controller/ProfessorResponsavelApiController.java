@@ -17,6 +17,7 @@ import br.ufscar.pescd.entity.User;
 import br.ufscar.pescd.entity.WorkPlan;
 import br.ufscar.pescd.repository.UserRepository;
 import br.ufscar.pescd.service.ProfessorResponsavelService;
+import br.ufscar.pescd.storage.SeaweedFsStorageService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -38,13 +39,16 @@ public class ProfessorResponsavelApiController {
 
     private final ProfessorResponsavelService professorResponsavelService;
     private final UserRepository userRepository;
+    private final SeaweedFsStorageService storageService;
 
     public ProfessorResponsavelApiController(
             ProfessorResponsavelService professorResponsavelService,
-            UserRepository userRepository
+            UserRepository userRepository,
+            SeaweedFsStorageService storageService
     ) {
         this.professorResponsavelService = professorResponsavelService;
         this.userRepository = userRepository;
+        this.storageService = storageService;
     }
 
     @GetMapping
@@ -119,7 +123,7 @@ public class ProfessorResponsavelApiController {
                 .contentType(MediaType.parseMediaType(plan.getContentType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "inline; filename=\"" + plan.getFileName() + "\"")
-                .body(plan.getFileContent());
+                .body(storageService.read(plan.getFileFid()));
     }
 
     // -------------------------------------------------------------------------
@@ -162,7 +166,7 @@ public class ProfessorResponsavelApiController {
                 .contentType(MediaType.parseMediaType(report.getContentType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "inline; filename=\"" + report.getFileName() + "\"")
-                .body(report.getFileContent());
+                .body(storageService.read(report.getFileFid()));
     }
 
     // -------------------------------------------------------------------------
@@ -205,7 +209,7 @@ public class ProfessorResponsavelApiController {
                 .contentType(MediaType.parseMediaType(doc.getContentType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "inline; filename=\"" + doc.getFileName() + "\"")
-                .body(doc.getFileContent());
+                .body(storageService.read(doc.getFileFid()));
     }
 
     private User resolveUser(Authentication authentication) {

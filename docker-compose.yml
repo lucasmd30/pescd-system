@@ -1,0 +1,38 @@
+# Infraestrutura de apoio ao PESCD:
+#   - PostgreSQL: banco relacional (metadados das ofertas, alunos, envios...)
+#   - SeaweedFS:  armazenamento dos arquivos PDF (planos, documentacoes, relatorios)
+#
+# Suba tudo com:  docker compose up -d
+#
+# O "weed server" sobe, em um unico processo, o master (9333), o volume (8080)
+# e o filer (8888) - exatamente o modo do quick start do SeaweedFS.
+services:
+  postgres:
+    image: postgres:16
+    container_name: pescd-postgres
+    environment:
+      POSTGRES_DB: pescd
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1234"
+    ports:
+      - "5432:5432"
+    volumes:
+      - pescd-postgres-data:/var/lib/postgresql/data
+
+  seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    container_name: pescd-seaweedfs
+    # -ip=localhost faz o master anunciar o volume como localhost:8080, que e
+    # alcancavel a partir do host (onde roda a aplicacao Spring) pelas portas
+    # publicadas abaixo. -ip.bind=0.0.0.0 escuta em todas as interfaces.
+    command: "server -dir=/data -master.port=9333 -volume.port=8080 -filer -ip=localhost -ip.bind=0.0.0.0"
+    ports:
+      - "9333:9333"   # master
+      - "8080:8080"   # volume
+      - "8888:8888"   # filer
+    volumes:
+      - pescd-seaweedfs-data:/data
+
+volumes:
+  pescd-postgres-data:
+  pescd-seaweedfs-data:
