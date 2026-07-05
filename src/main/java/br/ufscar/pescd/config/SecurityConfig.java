@@ -46,6 +46,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/offers").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers("/api/admin/users/**").hasRole("ADMIN")
+                        .requestMatchers("/api/secretary/**").hasRole("SECRETARIO")
+                        .requestMatchers("/api/professor/responsavel/**").hasRole("PROFESSOR")
                         .requestMatchers("/api/auth/**").authenticated()
                         .requestMatchers("/admin/users/**").hasRole("ADMIN")
                         .requestMatchers("/secretary/**").hasRole("SECRETARIO")

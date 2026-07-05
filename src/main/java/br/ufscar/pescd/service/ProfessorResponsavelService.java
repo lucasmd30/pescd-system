@@ -2,7 +2,11 @@ package br.ufscar.pescd.service;
 
 import br.ufscar.pescd.dto.AnalyzeDocumentationFormDTO;
 import br.ufscar.pescd.dto.ConcludeReportFormDTO;
+import br.ufscar.pescd.dto.OfferDetailsResponse;
+import br.ufscar.pescd.dto.OfferStudentSummaryResponse;
+import br.ufscar.pescd.dto.OfferSummaryResponse;
 import br.ufscar.pescd.dto.ResponsavelDashboardDTO;
+import br.ufscar.pescd.dto.ResponsibleCloseOfferSummaryResponse;
 import br.ufscar.pescd.entity.*;
 import br.ufscar.pescd.enums.OfferStatus;
 import br.ufscar.pescd.enums.StudentOfferStatus;
@@ -26,6 +30,7 @@ public class ProfessorResponsavelService {
     private final ReportRepository reportRepository;
     private final DocumentationRepository documentationRepository;
     private final StatusChangeLogRepository statusChangeLogRepository;
+    private final OfferApiMapper offerApiMapper;
 
     public ProfessorResponsavelService(
             OfferStudentRepository offerStudentRepository,
@@ -33,7 +38,8 @@ public class ProfessorResponsavelService {
             ReportRepository reportRepository,
             DocumentationRepository documentationRepository,
             StatusChangeLogRepository statusChangeLogRepository,
-            OfferRepository offerRepository
+            OfferRepository offerRepository,
+            OfferApiMapper offerApiMapper
     ) {
         this.offerStudentRepository = offerStudentRepository;
         this.workPlanRepository = workPlanRepository;
@@ -41,6 +47,7 @@ public class ProfessorResponsavelService {
         this.documentationRepository = documentationRepository;
         this.statusChangeLogRepository = statusChangeLogRepository;
         this.offerRepository = offerRepository;
+        this.offerApiMapper = offerApiMapper;
     }
 
     // -------------------------------------------------------------------------
@@ -63,6 +70,35 @@ public class ProfessorResponsavelService {
                         Comparator.reverseOrder()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<OfferDetailsResponse> getDashboardForApi(User professor) {
+        return getDashboard(professor).stream()
+                .map(item -> offerApiMapper.toOfferDetails(item.getOffer(), item.getStudents()))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public OfferDetailsResponse getOfferDetailsForApi(Long offerId, User professor) {
+        Offer offer = getOfferForResponsible(offerId, professor);
+        return offerApiMapper.toOfferDetails(offer, offerStudentRepository.findByOffer(offer));
+    }
+
+    @Transactional(readOnly = true)
+    public List<OfferStudentSummaryResponse> searchStudentsByNameForApi(
+            Long offerId,
+            User professor,
+            String name
+    ) {
+        Offer offer = getOfferForResponsible(offerId, professor);
+        String normalizedName = name == null ? "" : name.trim().toLowerCase();
+
+        return offerStudentRepository.findByOffer(offer).stream()
+                .filter(enrollment -> normalizedName.isBlank()
+                        || enrollment.getStudent().getFullName().toLowerCase().contains(normalizedName))
+                .map(offerApiMapper::toOfferStudentSummary)
+                .toList();
     }
 
     // -------------------------------------------------------------------------
@@ -145,6 +181,23 @@ public class ProfessorResponsavelService {
                         new IllegalArgumentException("Oferta não encontrada."));
     }
 
+    @Transactional(readOnly = true)
+    public ResponsibleCloseOfferSummaryResponse getCloseOfferSummaryForApi(Long offerId, User professor) {
+        Offer offer = getOfferForResponsible(offerId, professor);
+        List<OfferStudent> students = offerStudentRepository.findByOffer(offer);
+        return offerApiMapper.toResponsibleCloseSummary(offer, students, canRequestClosure(students));
+    }
+
+    @Transactional
+    public OfferSummaryResponse closeOfferForApi(
+            Long offerId,
+            User professor,
+            String lessonsLearned
+    ) {
+        closeOffer(offerId, professor, lessonsLearned);
+        return offerApiMapper.toOfferSummary(getOfferForResponsible(offerId, professor));
+    }
+
     @Transactional
     public void closeOffer(
             Long offerId,
@@ -175,6 +228,8 @@ public class ProfessorResponsavelService {
 
         offer.setLessonsLearned(lessonsLearned);
         offer.setStatus(OfferStatus.AGUARDANDO_ENCERRAMENTO_SECRETARIO);
+        offer.setClosureRequestedAt(LocalDateTime.now());
+        offer.setClosureRequestedBy(professor);
 
         offerRepository.save(offer);
     }
@@ -225,5 +280,21 @@ public class ProfessorResponsavelService {
 
         os.setStatus(newStatus);
         offerStudentRepository.save(os);
+    }
+
+    private Offer getOfferForResponsible(Long offerId, User professor) {
+        Offer offer = getOffer(offerId);
+
+        if (offer.getResponsibleProfessor() == null
+                || !offer.getResponsibleProfessor().getId().equals(professor.getId())) {
+            throw new AccessDeniedException("Você não é o professor responsável desta oferta.");
+        }
+
+        return offer;
+    }
+
+    private boolean canRequestClosure(List<OfferStudent> students) {
+        return students.stream()
+                .allMatch(s -> s.getStatus() == StudentOfferStatus.CONCLUIDO_RESPONSAVEL);
     }
 }
