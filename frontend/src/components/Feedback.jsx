@@ -12,6 +12,8 @@ export function Loading({ children = 'Carregando…' }) {
   return <div className="loading">{children}</div>;
 }
 
-export function StatusBadge({ label }) {
-  return <span className="badge">{label}</span>;
+// `status` é o nome do enum (ex.: PLANO_ENVIADO) e define a cor; `label` é o texto.
+export function StatusBadge({ label, status }) {
+  const cls = status ? `badge st-${String(status).toLowerCase()}` : 'badge';
+  return <span className={cls}>{label}</span>;
 }

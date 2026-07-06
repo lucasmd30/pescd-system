@@ -11,6 +11,7 @@ import UsersPage from './pages/admin/UsersPage.jsx';
 import OffersListPage from './pages/secretary/OffersListPage.jsx';
 import OfferCreatePage from './pages/secretary/OfferCreatePage.jsx';
 import OfferDetailsPage from './pages/secretary/OfferDetailsPage.jsx';
+import StudentDetailsPage from './pages/secretary/StudentDetailsPage.jsx';
 
 import EnrollmentsPage from './pages/aluno/EnrollmentsPage.jsx';
 import EnrollmentDetailsPage from './pages/aluno/EnrollmentDetailsPage.jsx';
@@ -22,6 +23,8 @@ import SupervisorDashboard from './pages/professor/SupervisorDashboard.jsx';
 import SupervisorEnrollmentPage from './pages/professor/SupervisorEnrollmentPage.jsx';
 import ResponsavelDashboard from './pages/professor/ResponsavelDashboard.jsx';
 import ResponsavelEnrollmentPage from './pages/professor/ResponsavelEnrollmentPage.jsx';
+import ResponsavelOfferDetailsPage from './pages/professor/ResponsavelOfferDetailsPage.jsx';
+import ResponsavelCloseOfferPage from './pages/professor/ResponsavelCloseOfferPage.jsx';
 
 export default function App() {
   return (
@@ -49,6 +52,10 @@ export default function App() {
         <Route
           path="secretaria/ofertas/:offerId"
           element={<ProtectedRoute roles={['SECRETARIO']}><OfferDetailsPage /></ProtectedRoute>}
+        />
+        <Route
+          path="secretaria/ofertas/:offerId/alunos/:offerStudentId"
+          element={<ProtectedRoute roles={['SECRETARIO']}><StudentDetailsPage /></ProtectedRoute>}
         />
 
         {/* Aluno (AL.01 a AL.04) */}
@@ -87,6 +94,14 @@ export default function App() {
         <Route
           path="professor/responsavel"
           element={<ProtectedRoute roles={['PROFESSOR']}><ResponsavelDashboard /></ProtectedRoute>}
+        />
+        <Route
+          path="professor/responsavel/ofertas/:offerId"
+          element={<ProtectedRoute roles={['PROFESSOR']}><ResponsavelOfferDetailsPage /></ProtectedRoute>}
+        />
+        <Route
+          path="professor/responsavel/ofertas/:offerId/encerrar"
+          element={<ProtectedRoute roles={['PROFESSOR']}><ResponsavelCloseOfferPage /></ProtectedRoute>}
         />
         <Route
           path="professor/responsavel/ofertas/:offerId/alunos/:studentId"

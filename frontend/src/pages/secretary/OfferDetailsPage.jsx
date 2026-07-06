@@ -112,10 +112,10 @@ export default function OfferDetailsPage() {
                 <tr key={s.enrollmentId}>
                   <td>{s.student.fullName}</td>
                   <td>{s.student.email}</td>
-                  <td><StatusBadge label={s.statusLabel} /></td>
+                  <td><StatusBadge label={s.statusLabel} status={s.status} /></td>
                   <td>
-                    <Link to={`/secretaria/ofertas/${offerId}?aluno=${s.enrollmentId}`} className="muted">
-                      #{s.enrollmentId}
+                    <Link to={`/secretaria/ofertas/${offerId}/alunos/${s.enrollmentId}`}>
+                      Ver detalhes
                     </Link>
                   </td>
                 </tr>

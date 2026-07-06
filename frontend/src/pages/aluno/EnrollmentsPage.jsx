@@ -44,7 +44,7 @@ export default function EnrollmentsPage() {
                     <td>{item.offer.name}</td>
                     <td>{item.offer.semester}</td>
                     <td>{formatDate(item.offer.startDate)} – {formatDate(item.offer.endDate)}</td>
-                    <td><StatusBadge label={item.enrollment.statusLabel} /></td>
+                    <td><StatusBadge label={item.enrollment.statusLabel} status={item.enrollment.status} /></td>
                     <td>
                       <Link to={`/aluno/ofertas/${item.enrollment.enrollmentId}`}>Abrir</Link>
                     </td>

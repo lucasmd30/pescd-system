@@ -7,6 +7,7 @@ export default function SupervisorDashboard() {
       title="Professor supervisor"
       subtitle="Ofertas e alunos que você supervisiona."
       endpoint="/api/professor/supervisor/offers"
+      role="supervisor"
       studentLink={(offerId, studentId) =>
         `/professor/supervisor/ofertas/${offerId}/alunos/${studentId}`}
     />
