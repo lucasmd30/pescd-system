@@ -37,7 +37,14 @@ export default function ResponsavelCloseOfferPage() {
   if (!summary) return <ErrorMessage>{error}</ErrorMessage>;
 
   const { offer } = summary;
+  const students = summary.students || [];
   const grades = Object.entries(summary.gradeDistribution || {});
+
+  const completionLabel = (src) => {
+    if (src === 'REPORT') return 'Relatório';
+    if (src === 'DOCUMENTATION') return 'Documentação';
+    return '—';
+  };
 
   return (
     <div>
@@ -70,6 +77,30 @@ export default function ResponsavelCloseOfferPage() {
               ))}
             </div>
           </>
+        )}
+      </div>
+
+      <div className="card">
+        <SectionTitle>Notas finais dos alunos</SectionTitle>
+        {students.length === 0 ? (
+          <p className="muted">Nenhum aluno inscrito.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr><th>Aluno</th><th>Status</th><th>Concluído via</th><th>Frequência final</th><th>Nota final</th></tr>
+            </thead>
+            <tbody>
+              {students.map((s) => (
+                <tr key={s.enrollmentId}>
+                  <td>{s.student.fullName}</td>
+                  <td><StatusBadge label={s.statusLabel} status={s.status} /></td>
+                  <td>{completionLabel(s.completionSource)}</td>
+                  <td>{s.finalFrequency != null ? `${s.finalFrequency}%` : '—'}</td>
+                  <td>{s.finalGradeLabel || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
 
