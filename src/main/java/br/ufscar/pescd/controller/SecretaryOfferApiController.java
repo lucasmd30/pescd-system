@@ -1,5 +1,6 @@
 package br.ufscar.pescd.controller;
 
+import br.ufscar.pescd.dto.ApiErrorResponse;
 import br.ufscar.pescd.dto.ImportStudentsResponse;
 import br.ufscar.pescd.dto.OfferDetailsResponse;
 import br.ufscar.pescd.dto.OfferForm;
@@ -10,6 +11,13 @@ import br.ufscar.pescd.dto.SecretaryCloseOfferRequest;
 import br.ufscar.pescd.dto.StudentForm;
 import br.ufscar.pescd.dto.UserSummaryResponse;
 import br.ufscar.pescd.service.SecretaryOfferService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -27,6 +35,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/secretary/offers")
+@Tag(name = "Secretaria", description = "Operações REST da secretaria sobre ofertas e alunos.")
+@SecurityRequirement(name = "sessionAuth")
 public class SecretaryOfferApiController {
 
     private final SecretaryOfferService secretaryOfferService;
@@ -36,19 +46,25 @@ public class SecretaryOfferApiController {
     }
 
     @GetMapping
+    @Operation(summary = "Listar ofertas", description = "Retorna todas as ofertas gerenciadas pela secretaria.")
     public List<OfferSummaryResponse> listOffers() {
         return secretaryOfferService.listOffersForApi();
     }
 
-    // S.01 - lista de professores para escolha do responsável no formulário de criação.
     @GetMapping("/professors")
+    @Operation(summary = "Listar professores", description = "Retorna os professores disponíveis para vinculação como responsáveis.")
     public List<UserSummaryResponse> listProfessors() {
         return secretaryOfferService.listProfessorsForApi();
     }
 
-    // S.01 - criação de uma nova oferta.
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Criar oferta", description = "Cria uma nova oferta no sistema.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Oferta criada com sucesso."),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos.",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+    })
     public OfferSummaryResponse createOffer(
             @Valid @RequestBody OfferForm form,
             Authentication authentication
@@ -57,13 +73,14 @@ public class SecretaryOfferApiController {
     }
 
     @GetMapping("/{offerId}")
+    @Operation(summary = "Detalhar oferta", description = "Retorna os dados completos de uma oferta específica.")
     public OfferDetailsResponse offerDetails(@PathVariable Long offerId) {
         return secretaryOfferService.getOfferDetailsForApi(offerId);
     }
 
-    // S.02 - inclusão manual de um aluno na oferta.
     @PostMapping("/{offerId}/students")
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Adicionar aluno à oferta", description = "Adiciona manualmente um aluno em uma oferta existente.")
     public OfferDetailsResponse addStudent(
             @PathVariable Long offerId,
             @Valid @RequestBody StudentForm form
@@ -71,8 +88,8 @@ public class SecretaryOfferApiController {
         return secretaryOfferService.addStudentForApi(offerId, form);
     }
 
-    // S.02 - importação de alunos via arquivo CSV (RA,NOME_COMPLETO,EMAIL).
     @PostMapping("/{offerId}/students/import")
+    @Operation(summary = "Importar alunos por CSV", description = "Importa alunos para uma oferta a partir de um arquivo CSV no formato RA,NOME_COMPLETO,EMAIL.")
     public ImportStudentsResponse importStudents(
             @PathVariable Long offerId,
             @RequestParam("file") MultipartFile file
@@ -81,6 +98,7 @@ public class SecretaryOfferApiController {
     }
 
     @GetMapping("/{offerId}/students/{offerStudentId}")
+    @Operation(summary = "Detalhar vínculo aluno-oferta", description = "Retorna os dados detalhados de um aluno inscrito em uma oferta.")
     public OfferStudentDetailsResponse studentDetails(
             @PathVariable Long offerId,
             @PathVariable Long offerStudentId
@@ -89,11 +107,13 @@ public class SecretaryOfferApiController {
     }
 
     @GetMapping("/{offerId}/close")
+    @Operation(summary = "Prévia de encerramento", description = "Retorna o resumo necessário para o encerramento da oferta pela secretaria.")
     public SecretaryCloseOfferPreviewResponse closePreview(@PathVariable Long offerId) {
         return secretaryOfferService.getCloseOfferPreviewForApi(offerId);
     }
 
     @PostMapping("/{offerId}/close")
+    @Operation(summary = "Encerrar oferta", description = "Efetiva o encerramento de uma oferta pela secretaria.")
     public OfferSummaryResponse closeOffer(
             @PathVariable Long offerId,
             @Valid @RequestBody SecretaryCloseOfferRequest request,

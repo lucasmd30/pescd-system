@@ -25,8 +25,19 @@ spring:
       hibernate:
         format_sql: true
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+
 # Armazenamento de arquivos no SeaweedFS (substitui o bytea no PostgreSQL).
 # Aponta para o master server; o quick start sobe master + volume em um comando:
 #   weed server -dir=./data -master.port=9333
 seaweedfs:
   master-url: http://localhost:9333
+
+server:
+  port: 8082

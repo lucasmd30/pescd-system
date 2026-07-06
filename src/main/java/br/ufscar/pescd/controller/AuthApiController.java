@@ -1,10 +1,19 @@
 package br.ufscar.pescd.controller;
 
+import br.ufscar.pescd.dto.ApiErrorResponse;
 import br.ufscar.pescd.dto.AuthLoginRequest;
 import br.ufscar.pescd.dto.AuthResponse;
 import br.ufscar.pescd.entity.User;
 import br.ufscar.pescd.repository.UserRepository;
 import br.ufscar.pescd.security.RoleRedirectService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -26,6 +35,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Autenticação", description = "Endpoints de login, sessão atual e logout.")
 public class AuthApiController {
 
     private final AuthenticationManager authenticationManager;
@@ -43,6 +53,19 @@ public class AuthApiController {
     }
 
     @PostMapping("/login")
+    @Operation(
+            summary = "Autenticar usuário",
+            description = "Autentica o usuário com username e senha, cria a sessão HTTP e retorna os dados da sessão autenticada."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Login realizado com sucesso.",
+                    content = @Content(schema = @Schema(implementation = AuthResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos na requisição.",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Credenciais inválidas.",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class),
+                            examples = @ExampleObject(value = "{\"status\":401,\"error\":\"Unauthorized\",\"message\":\"Nome de usuário ou senha inválidos.\"}")))
+    })
     public ResponseEntity<AuthResponse> login(
             @Valid @RequestBody AuthLoginRequest request,
             HttpServletRequest httpRequest
@@ -64,6 +87,17 @@ public class AuthApiController {
     }
 
     @GetMapping("/me")
+    @SecurityRequirement(name = "sessionAuth")
+    @Operation(
+            summary = "Consultar sessão atual",
+            description = "Retorna os dados do usuário autenticado na sessão HTTP atual."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Sessão autenticada encontrada.",
+                    content = @Content(schema = @Schema(implementation = AuthResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Sessão inexistente ou expirada.",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+    })
     public ResponseEntity<AuthResponse> me(Authentication authentication) {
         User user = userRepository.findByUsername(authentication.getName())
                 .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
@@ -72,6 +106,16 @@ public class AuthApiController {
     }
 
     @PostMapping("/logout")
+    @SecurityRequirement(name = "sessionAuth")
+    @Operation(
+            summary = "Encerrar sessão",
+            description = "Encerra a sessão HTTP autenticada e remove o contexto de segurança."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Logout realizado com sucesso."),
+            @ApiResponse(responseCode = "401", description = "Sessão inexistente ou expirada.",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+    })
     public ResponseEntity<Void> logout(
             HttpServletRequest request,
             HttpServletResponse response,

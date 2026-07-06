@@ -12,6 +12,13 @@ import br.ufscar.pescd.entity.Report;
 import br.ufscar.pescd.entity.WorkPlan;
 import br.ufscar.pescd.service.StudentOfferService;
 import br.ufscar.pescd.storage.SeaweedFsStorageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -26,16 +33,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * AL.01 a AL.04 - fluxo do aluno como REST API.
- *
- * AL.01 - visualiza suas ofertas e o status de cada uma.
- * AL.02 - envio do plano de trabalho (PDF, define supervisor).
- * AL.03 - envio da documentação comprobatória (PDF).
- * AL.04 - envio do relatório final (frequência 0-100, PDF).
- */
 @RestController
 @RequestMapping("/api/aluno/ofertas")
+@Tag(name = "Aluno", description = "Fluxo REST do aluno para ofertas, plano, documentação e relatório.")
+@SecurityRequirement(name = "sessionAuth")
 public class StudentOfferApiController {
 
     private final StudentOfferService studentOfferService;
@@ -49,14 +50,14 @@ public class StudentOfferApiController {
         this.storageService = storageService;
     }
 
-    // AL.01 - lista de ofertas do aluno com o status de cada inscrição.
     @GetMapping
+    @Operation(summary = "Listar inscrições do aluno", description = "Retorna as ofertas em que o aluno autenticado está inscrito.")
     public List<StudentOfferSummaryResponse> listEnrollments(Authentication authentication) {
         return studentOfferService.listEnrollmentsForApi(authentication.getName());
     }
 
-    // AL.01/AL.04 - detalhes de uma inscrição, com envios e histórico de status.
     @GetMapping("/{id}")
+    @Operation(summary = "Detalhar inscrição", description = "Retorna os detalhes de uma inscrição específica do aluno.")
     public StudentEnrollmentDetailsResponse enrollmentDetails(
             @PathVariable Long id,
             Authentication authentication
@@ -64,14 +65,14 @@ public class StudentOfferApiController {
         return studentOfferService.getEnrollmentDetailsForApi(id, authentication.getName());
     }
 
-    // AL.02 - lista de professores para escolha do supervisor.
     @GetMapping("/professors")
+    @Operation(summary = "Listar professores", description = "Retorna os professores disponíveis para seleção como supervisores.")
     public List<UserSummaryResponse> listProfessors() {
         return studentOfferService.listProfessorsForApi();
     }
 
-    // AL.02 - envio do plano de trabalho (multipart: campos + PDF).
     @PostMapping("/{id}/plano")
+    @Operation(summary = "Enviar plano de trabalho", description = "Realiza o envio multipart do plano de trabalho em PDF e define o professor supervisor.")
     public StudentEnrollmentDetailsResponse submitWorkPlan(
             @PathVariable Long id,
             @Valid @ModelAttribute WorkPlanForm form,
@@ -80,8 +81,8 @@ public class StudentOfferApiController {
         return studentOfferService.submitWorkPlanForApi(id, authentication.getName(), form);
     }
 
-    // AL.03 - envio da documentação comprobatória (multipart: campos + PDF).
     @PostMapping("/{id}/documentacao")
+    @Operation(summary = "Enviar documentação", description = "Realiza o envio multipart da documentação comprobatória em PDF.")
     public StudentEnrollmentDetailsResponse submitDocumentation(
             @PathVariable Long id,
             @Valid @ModelAttribute DocumentationForm form,
@@ -90,8 +91,8 @@ public class StudentOfferApiController {
         return studentOfferService.submitDocumentationForApi(id, authentication.getName(), form);
     }
 
-    // AL.04 - envio do relatório final (multipart: frequência + PDF).
     @PostMapping("/{id}/relatorio")
+    @Operation(summary = "Enviar relatório final", description = "Realiza o envio multipart do relatório final do aluno em PDF com indicador de frequência.")
     public StudentEnrollmentDetailsResponse submitReport(
             @PathVariable Long id,
             @Valid @ModelAttribute ReportForm form,
@@ -100,8 +101,14 @@ public class StudentOfferApiController {
         return studentOfferService.submitReportForApi(id, authentication.getName(), form);
     }
 
-    // Downloads dos arquivos enviados (PDF inline).
     @GetMapping("/{id}/plano/arquivo")
+    @Operation(summary = "Baixar plano de trabalho", description = "Retorna o PDF do plano de trabalho associado à inscrição.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Arquivo retornado com sucesso.",
+                    content = @Content(mediaType = "application/pdf",
+                            schema = @Schema(type = "string", format = "binary"))),
+            @ApiResponse(responseCode = "404", description = "Plano não encontrado.")
+    })
     public ResponseEntity<byte[]> downloadWorkPlan(@PathVariable Long id, Authentication authentication) {
         OfferStudent enrollment = studentOfferService.getEnrollment(id, authentication.getName());
         WorkPlan workPlan = studentOfferService.getWorkPlan(enrollment);
@@ -112,6 +119,13 @@ public class StudentOfferApiController {
     }
 
     @GetMapping("/{id}/documentacao/arquivo")
+    @Operation(summary = "Baixar documentação", description = "Retorna o PDF da documentação comprobatória associada à inscrição.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Arquivo retornado com sucesso.",
+                    content = @Content(mediaType = "application/pdf",
+                            schema = @Schema(type = "string", format = "binary"))),
+            @ApiResponse(responseCode = "404", description = "Documentação não encontrada.")
+    })
     public ResponseEntity<byte[]> downloadDocumentation(@PathVariable Long id, Authentication authentication) {
         OfferStudent enrollment = studentOfferService.getEnrollment(id, authentication.getName());
         Documentation documentation = studentOfferService.getDocumentation(enrollment);
@@ -122,6 +136,13 @@ public class StudentOfferApiController {
     }
 
     @GetMapping("/{id}/relatorio/arquivo")
+    @Operation(summary = "Baixar relatório", description = "Retorna o PDF do relatório final associado à inscrição.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Arquivo retornado com sucesso.",
+                    content = @Content(mediaType = "application/pdf",
+                            schema = @Schema(type = "string", format = "binary"))),
+            @ApiResponse(responseCode = "404", description = "Relatório não encontrado.")
+    })
     public ResponseEntity<byte[]> downloadReport(@PathVariable Long id, Authentication authentication) {
         OfferStudent enrollment = studentOfferService.getEnrollment(id, authentication.getName());
         Report report = studentOfferService.getReport(enrollment);

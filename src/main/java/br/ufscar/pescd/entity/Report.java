@@ -35,7 +35,7 @@ public class Report {
     private String contentType;
 
     /** Identificador do arquivo no SeaweedFS (fid), ex.: "3,01637037d6". */
-    @Column(name = "file_fid", nullable = false)
+    @Column(name = "file_fid")
     private String fileFid;
 
     @Column(nullable = false, updatable = false)

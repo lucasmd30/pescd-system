@@ -18,6 +18,13 @@ import br.ufscar.pescd.entity.WorkPlan;
 import br.ufscar.pescd.repository.UserRepository;
 import br.ufscar.pescd.service.ProfessorResponsavelService;
 import br.ufscar.pescd.storage.SeaweedFsStorageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -35,6 +42,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/professor/responsavel/offers")
+@Tag(name = "Professor responsável", description = "Operações REST do professor responsável.")
+@SecurityRequirement(name = "sessionAuth")
 public class ProfessorResponsavelApiController {
 
     private final ProfessorResponsavelService professorResponsavelService;
@@ -52,11 +61,13 @@ public class ProfessorResponsavelApiController {
     }
 
     @GetMapping
+    @Operation(summary = "Listar ofertas do responsável", description = "Retorna as ofertas em que o professor autenticado é responsável.")
     public List<OfferDetailsResponse> listResponsibleOffers(Authentication authentication) {
         return professorResponsavelService.getDashboardForApi(resolveUser(authentication));
     }
 
     @GetMapping("/{offerId}")
+    @Operation(summary = "Detalhar oferta", description = "Retorna os detalhes completos de uma oferta do professor responsável.")
     public OfferDetailsResponse offerDetails(
             @PathVariable Long offerId,
             Authentication authentication
@@ -65,6 +76,7 @@ public class ProfessorResponsavelApiController {
     }
 
     @GetMapping("/{offerId}/students")
+    @Operation(summary = "Buscar alunos da oferta", description = "Lista os alunos da oferta, com filtro opcional por nome.")
     public List<OfferStudentSummaryResponse> searchStudents(
             @PathVariable Long offerId,
             @RequestParam(required = false) String name,
@@ -78,6 +90,7 @@ public class ProfessorResponsavelApiController {
     }
 
     @GetMapping("/{offerId}/close")
+    @Operation(summary = "Resumo para encerramento", description = "Retorna o resumo necessário para o encerramento da oferta pelo professor responsável.")
     public ResponsibleCloseOfferSummaryResponse closeSummary(
             @PathVariable Long offerId,
             Authentication authentication
@@ -86,6 +99,7 @@ public class ProfessorResponsavelApiController {
     }
 
     @PostMapping("/{offerId}/close")
+    @Operation(summary = "Encerrar oferta", description = "Encaminha as lições aprendidas e conclui o encerramento da oferta.")
     public OfferSummaryResponse closeOffer(
             @PathVariable Long offerId,
             @Valid @RequestBody CloseOfferFormDTO form,
@@ -99,6 +113,7 @@ public class ProfessorResponsavelApiController {
     }
 
     @GetMapping("/{offerId}/students/{studentId}")
+    @Operation(summary = "Detalhar inscrição do aluno", description = "Retorna os detalhes da inscrição do aluno em uma oferta do professor responsável.")
     public OfferStudentDetailsResponse enrollmentDetails(
             @PathVariable Long offerId,
             @PathVariable Long studentId,
@@ -109,6 +124,12 @@ public class ProfessorResponsavelApiController {
     }
 
     @GetMapping("/{offerId}/students/{studentId}/work-plan/download")
+    @Operation(summary = "Baixar plano de trabalho", description = "Retorna o PDF do plano de trabalho do aluno.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Arquivo retornado com sucesso.",
+                    content = @Content(mediaType = "application/pdf",
+                            schema = @Schema(type = "string", format = "binary")))
+    })
     public ResponseEntity<byte[]> downloadWorkPlan(
             @PathVariable Long offerId,
             @PathVariable Long studentId,
@@ -126,11 +147,8 @@ public class ProfessorResponsavelApiController {
                 .body(storageService.read(plan.getFileFid()));
     }
 
-    // -------------------------------------------------------------------------
-    // PR.01 — Conclusão do relatório de estágio de um aluno
-    // -------------------------------------------------------------------------
-
     @GetMapping("/{offerId}/students/{studentId}/report")
+    @Operation(summary = "Detalhar relatório", description = "Retorna os detalhes do relatório do aluno.")
     public ReportDetailsResponse reportDetails(
             @PathVariable Long offerId,
             @PathVariable Long studentId,
@@ -141,6 +159,7 @@ public class ProfessorResponsavelApiController {
     }
 
     @PostMapping("/{offerId}/students/{studentId}/report/conclude")
+    @Operation(summary = "Concluir relatório", description = "Registra o parecer final, a frequência final e a nota do aluno.")
     public OfferStudentSummaryResponse concludeReport(
             @PathVariable Long offerId,
             @PathVariable Long studentId,
@@ -152,6 +171,12 @@ public class ProfessorResponsavelApiController {
     }
 
     @GetMapping("/{offerId}/students/{studentId}/report/download")
+    @Operation(summary = "Baixar relatório", description = "Retorna o PDF do relatório do aluno.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Arquivo retornado com sucesso.",
+                    content = @Content(mediaType = "application/pdf",
+                            schema = @Schema(type = "string", format = "binary")))
+    })
     public ResponseEntity<byte[]> downloadReport(
             @PathVariable Long offerId,
             @PathVariable Long studentId,
@@ -169,11 +194,8 @@ public class ProfessorResponsavelApiController {
                 .body(storageService.read(report.getFileFid()));
     }
 
-    // -------------------------------------------------------------------------
-    // PR.02 — Análise e aprovação de documentação de aula
-    // -------------------------------------------------------------------------
-
     @GetMapping("/{offerId}/students/{studentId}/documentation")
+    @Operation(summary = "Detalhar documentação", description = "Retorna os detalhes da documentação comprobatória enviada pelo aluno.")
     public DocumentationDetailsResponse documentationDetails(
             @PathVariable Long offerId,
             @PathVariable Long studentId,
@@ -184,6 +206,7 @@ public class ProfessorResponsavelApiController {
     }
 
     @PostMapping("/{offerId}/students/{studentId}/documentation/analyze")
+    @Operation(summary = "Analisar documentação", description = "Registra a análise, frequência e nota final da documentação enviada pelo aluno.")
     public OfferStudentSummaryResponse analyzeDocumentation(
             @PathVariable Long offerId,
             @PathVariable Long studentId,
@@ -195,6 +218,12 @@ public class ProfessorResponsavelApiController {
     }
 
     @GetMapping("/{offerId}/students/{studentId}/documentation/download")
+    @Operation(summary = "Baixar documentação", description = "Retorna o PDF da documentação comprobatória do aluno.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Arquivo retornado com sucesso.",
+                    content = @Content(mediaType = "application/pdf",
+                            schema = @Schema(type = "string", format = "binary")))
+    })
     public ResponseEntity<byte[]> downloadDocumentation(
             @PathVariable Long offerId,
             @PathVariable Long studentId,
