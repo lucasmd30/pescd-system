@@ -36,7 +36,7 @@ export default function EnrollmentDetailsPage() {
 
       <div className="card">
         <div className="row-between">
-          <div><StatusBadge label={enrollment.statusLabel} /></div>
+          <div><StatusBadge label={enrollment.statusLabel} status={status} /></div>
           <div className="form-actions">
             {status === 'NAO_ENVIADO' && (
               <>
@@ -62,6 +62,7 @@ export default function EnrollmentDetailsPage() {
           <dl className="detail-grid">
             <dt>Disciplina</dt><dd>{workPlan.disciplineCode} — {workPlan.disciplineName}</dd>
             <dt>Curso</dt><dd>{workPlan.disciplineCourse}</dd>
+            <dt>Supervisor</dt><dd>{enrollment.supervisor?.fullName || '—'}</dd>
             <dt>Enviado em</dt><dd>{formatDateTime(workPlan.submittedAt)}</dd>
             <dt>Arquivo</dt><dd>{workPlan.fileName}</dd>
             {workPlan.supervisorApprovedAt && (

@@ -131,6 +131,73 @@ tr:last-child td { border-bottom: none; }
 .detail-grid dt { color: var(--muted); }
 .detail-grid dd { margin: 0; }
 
+/* Badges de status coloridos (espelha o sistema Thymeleaf antigo) */
+.badge.st-nao_enviado { background: #f3f4f6; color: #6b7280; }
+.badge.st-plano_enviado { background: #fef9c3; color: #854d0e; }
+.badge.st-plano_aprovado { background: #dcfce7; color: #166534; }
+.badge.st-documentacao_enviada { background: #fef9c3; color: #854d0e; }
+.badge.st-relatorio_enviado { background: #fef9c3; color: #854d0e; }
+.badge.st-relatorio_aprovado_supervisor { background: #dbeafe; color: #1d4ed8; }
+.badge.st-concluido_responsavel { background: #dcfce7; color: #166534; }
+
+/* Grid de dados (só-leitura) usado nas telas de análise/aprovação */
+.section-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--muted);
+  margin: 24px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+.info-item label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: #9ca3af;
+  margin-bottom: 2px;
+}
+.info-item span { font-size: 14px; color: var(--text); }
+.info-item.span-2 { grid-column: span 2; }
+
+/* Caixa da avaliação do supervisor (tela de concluir relatório) */
+.supervisor-box {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 12px;
+}
+.supervisor-box .supervisor-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .04em; color: #1d4ed8; margin-bottom: 10px;
+}
+.supervisor-row { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 8px; font-size: 14px; }
+.supervisor-row strong { font-size: 12px; color: var(--muted); margin-right: 4px; font-weight: 600; }
+.supervisor-parecer { font-size: 14px; color: #374151; white-space: pre-wrap; margin-top: 8px; }
+
+/* Linha do tempo do histórico de status */
+.timeline { list-style: none; padding: 0; margin: 0; }
+.timeline li {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+}
+.timeline li:last-child { border-bottom: none; }
+.timeline .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); margin-top: 5px; flex-shrink: 0; }
+.timeline .log-date { color: var(--muted); font-size: 12px; }
+
 .login-wrap {
   min-height: 100vh;
   display: flex;
