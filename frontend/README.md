@@ -5,7 +5,7 @@ telas Thymeleaf, mantendo os mesmos fluxos por perfil.
 
 ## Pré-requisitos
 
-A API precisa estar no ar em `http://localhost:8080` (veja o README da raiz:
+A API precisa estar no ar em `http://localhost:8082` (veja o README da raiz:
 `docker compose up -d` + `./mvnw spring-boot:run`).
 
 ## Executar em desenvolvimento
@@ -16,7 +16,7 @@ npm install
 npm run dev      # http://localhost:5173
 ```
 
-O Vite faz **proxy de `/api` para `http://localhost:8080`** (ver `vite.config.js`),
+O Vite faz **proxy de `/api` para `http://localhost:8082`** (ver `vite.config.js`),
 então o navegador enxerga front e API na mesma origem — o cookie de sessão do
 Spring Security funciona sem CORS.
 
